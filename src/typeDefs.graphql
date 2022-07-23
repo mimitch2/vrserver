@@ -33,5 +33,5 @@ type VRRelease {
 
 type Query {
   getCollection: Collection!
-  getRelease: VRRelease
+  getRelease(releaseId: Int): VRRelease
 }

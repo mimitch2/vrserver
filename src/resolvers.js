@@ -16,8 +16,8 @@ const getCollection = async () => {
     return result;
 };
 
-const getRelease = async () => {
-    const release = await Release.findOne({ releaseId: 1158751 });
+const getRelease = async (__, { releaseId }) => {
+    const release = await Release.findOne({ releaseId });
 
     return release;
 };
