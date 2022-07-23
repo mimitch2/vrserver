@@ -25,13 +25,49 @@ type Collection {
   releases: [Releases]!
 }
 
+type VRRating {
+  quietness: Float!
+  flatness: Float!
+  clarity: Float!
+  rating: Float!
+  title: String!
+  artist: String!
+  createdAt: String!
+  notes: String!
+  release: String!
+  updatedAt: String!
+  user: String!
+  washedAt: String
+}
+
 type VRRelease {
-  releaseId: Int
-  title: String
-  artist: String
+  releaseId: Int!
+  title: String!
+  artist: String!
+  avgQuietness: Float!
+  avgFlatness: Float!
+  avgClarity: Float!
+  avgRating: Float!
+  ratingsCount: Int!
+  currentUserRating: VRRating
+  vinylRatings: [VRRating]
 }
 
 type Query {
   getCollection: Collection!
-  getRelease(releaseId: Int): VRRelease
+  getRelease(releaseId: Int!): VRRelease!
 }
+
+type Mutation {
+  addRelease( 
+    releaseId: Int!,
+    title: String!,
+    artist: String!,
+    avgQuietness: Float!,
+    avgFlatness: Float!,
+    avgClarity: Float!,
+    avgRating: Float!,
+    ratingsCount: Int!
+  ): VRRelease
+}
+

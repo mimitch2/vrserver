@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
+import Float from 'mongoose-float';
 
-// const Float = require('mongoose-float').loadType(mongoose);
+const { Schema, model } = mongoose;
+const FloatType = Float.loadType(mongoose);
 
-const releaseSchema = new mongoose.Schema(
+const releaseSchema = new Schema(
     {
         releaseId: {
             type: Number,
@@ -21,47 +23,27 @@ const releaseSchema = new mongoose.Schema(
             required: true,
             default: 0
         },
-        overallRatingAverage: {
-            type: Number,
+        avgRating: {
+            type: FloatType,
             required: true
         },
-        overallRatingTotal: {
-            type: Number,
+        avgQuietness: {
+            type: FloatType,
             required: true,
             default: 0
         },
-        flatnessAverage: {
-            type: Number,
+        avgFlatness: {
+            type: FloatType,
             required: true,
             default: 0
         },
-        flatnessTotal: {
-            type: Number,
-            required: true,
-            default: 0
-        },
-        quietnessAverage: {
-            type: Number,
-            required: true,
-            default: 0
-        },
-        quietnessTotal: {
-            type: Number,
-            required: true,
-            default: 0
-        },
-        physicalConditionAverage: {
-            type: Number,
-            required: true,
-            default: 0
-        },
-        physicalConditionTotal: {
-            type: Number,
+        avgClarity: {
+            type: FloatType,
             required: true,
             default: 0
         },
         washedAt: {
-            type: String,
+            type: Date,
             default: null
         }
     },
@@ -83,4 +65,4 @@ releaseSchema.virtual('currentUserRating', {
 releaseSchema.set('toObject', { virtuals: true });
 releaseSchema.set('toJSON', { virtuals: true });
 
-export default mongoose.model('Release', releaseSchema);
+export default model('Release', releaseSchema);

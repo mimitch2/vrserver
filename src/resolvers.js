@@ -22,4 +22,15 @@ const getRelease = async (__, { releaseId }) => {
     return release;
 };
 
-export const resolvers = { Query: { getCollection, getRelease } };
+const addRelease = async (__, args) => {
+    const release = await Release.create({ ...args });
+
+    return release;
+};
+
+export const resolvers = {
+    Query: { getCollection, getRelease },
+    Mutation: {
+        addRelease
+    }
+};
