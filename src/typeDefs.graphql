@@ -1,0 +1,30 @@
+type Pagination {
+  items: Int!
+  page: Int!
+  pages: Int!
+  per_page: Int!
+}
+
+type BasicInformation {
+  title: String!
+  thumb: String!
+}
+
+type Release {
+  title: String!
+  thumb: String
+  artists_sort: String
+}
+
+type Releases {
+  basic_information: BasicInformation!
+}
+
+type Collection {
+  pagination: Pagination!
+  releases: [Releases]!
+}
+
+type Query {
+  getCollection: Collection!
+}
