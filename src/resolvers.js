@@ -1,5 +1,5 @@
-// const fetch = require('node-fetch');
 import fetch from 'node-fetch';
+import Release from './Schemas/Releases.schema.js';
 
 const getCollection = async () => {
     const response = await fetch(
@@ -16,4 +16,10 @@ const getCollection = async () => {
     return result;
 };
 
-export const resolvers = { Query: { getCollection } };
+const getRelease = async () => {
+    const release = await Release.findOne({ releaseId: 1158751 });
+
+    return release;
+};
+
+export const resolvers = { Query: { getCollection, getRelease } };

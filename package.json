@@ -27,6 +27,7 @@
         "graphql": "^16.5.0",
         "mongodb": "^4.8.0",
         "mongoose": "^6.4.6",
+        "mongoose-float": "^1.0.4",
         "node-fetch": "^3.2.9",
         "nodemon": "^2.0.19"
     },

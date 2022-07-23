@@ -25,6 +25,13 @@ type Collection {
   releases: [Releases]!
 }
 
+type VRRelease {
+  releaseId: Int
+  title: String
+  artist: String
+}
+
 type Query {
   getCollection: Collection!
+  getRelease: VRRelease
 }
