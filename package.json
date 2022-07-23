@@ -22,7 +22,10 @@
     "homepage": "https://github.com/mimitch2/vrserver#readme",
     "dependencies": {
         "apollo-server": "^3.10.0",
+        "apollo-server-core": "^3.10.0",
+        "apollo-server-express": "^3.10.0",
         "dotenv": "^16.0.1",
+        "express": "^4.18.1",
         "fs": "^0.0.1-security",
         "graphql": "^16.5.0",
         "mongodb": "^4.8.0",
