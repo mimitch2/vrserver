@@ -1,73 +1,72 @@
 type Pagination {
-  items: Int!
-  page: Int!
-  pages: Int!
-  per_page: Int!
+    items: Int!
+    page: Int!
+    pages: Int!
+    per_page: Int!
 }
 
 type BasicInformation {
-  title: String!
-  thumb: String!
+    title: String!
+    thumb: String!
 }
 
 type Release {
-  title: String!
-  thumb: String
-  artists_sort: String
+    title: String!
+    thumb: String
+    artists_sort: String
 }
 
 type Releases {
-  basic_information: BasicInformation!
+    basic_information: BasicInformation!
 }
 
 type Collection {
-  pagination: Pagination!
-  releases: [Releases]!
+    pagination: Pagination!
+    releases: [Releases]!
 }
 
 type VRRating {
-  quietness: Float!
-  flatness: Float!
-  clarity: Float!
-  rating: Float!
-  title: String!
-  artist: String!
-  createdAt: String!
-  notes: String!
-  release: String!
-  updatedAt: String!
-  user: String!
-  washedAt: String
+    quietness: Float!
+    flatness: Float!
+    clarity: Float!
+    rating: Float!
+    title: String!
+    artist: String!
+    createdAt: String!
+    notes: String!
+    release: String!
+    updatedAt: String!
+    user: String!
+    washedAt: String
 }
 
 type VRRelease {
-  releaseId: Int!
-  title: String!
-  artist: String!
-  avgQuietness: Float!
-  avgFlatness: Float!
-  avgClarity: Float!
-  avgRating: Float!
-  ratingsCount: Int!
-  currentUserRating: VRRating
-  vinylRatings: [VRRating]
+    releaseId: Int!
+    title: String!
+    artist: String!
+    avgQuietness: Float!
+    avgFlatness: Float!
+    avgClarity: Float!
+    avgRating: Float!
+    ratingsCount: Int!
+    currentUserRating: VRRating
+    vinylRatings: [VRRating]
 }
 
 type Query {
-  getCollection: Collection!
-  getRelease(releaseId: Int!): VRRelease!
+    getCollection: Collection!
+    getRelease(releaseId: Int!): VRRelease!
 }
 
 type Mutation {
-  addRelease( 
-    releaseId: Int!,
-    title: String!,
-    artist: String!,
-    avgQuietness: Float!,
-    avgFlatness: Float!,
-    avgClarity: Float!,
-    avgRating: Float!,
-    ratingsCount: Int!
-  ): VRRelease
+    addRelease(
+        releaseId: Int!
+        title: String!
+        artist: String!
+        avgQuietness: Float!
+        avgFlatness: Float!
+        avgClarity: Float!
+        avgRating: Float!
+        ratingsCount: Int!
+    ): VRRelease
 }
-
