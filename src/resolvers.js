@@ -1,5 +1,8 @@
 import fetch from 'node-fetch';
+import jwt from 'jsonwebtoken';
+import Rating from './Schemas/Rating.schema.js';
 import Release from './Schemas/Releases.schema.js';
+import User from './Schemas/User.schema.js';
 
 const getCollection = async () => {
     const response = await fetch(
@@ -28,8 +31,23 @@ const addRelease = async (__, args) => {
     return release;
 };
 
+const getUser = async (__, { username }) => {
+    // console.log('🚀 ~ file: resolvers.js ~ line 34 ~ getUser ~ auth', auth);
+    // const parsedAuth = JSON.parse(auth);
+    // const username = jwt.verify(parsedAuth.username, process.env.JWT_SECRET);
+
+    const user = await User.findOne({ username }).populate({
+        path: 'vinylRatings',
+        populate: {
+            path: 'user'
+        }
+    });
+
+    return user;
+};
+
 export const resolvers = {
-    Query: { getCollection, getRelease },
+    Query: { getCollection, getRelease, getUser },
     Mutation: {
         addRelease
     }

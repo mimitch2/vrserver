@@ -4,8 +4,8 @@ import { readFileSync } from 'fs';
 import express from 'express';
 import http from 'http';
 import mongoose from 'mongoose';
-import cors from 'cors';
-import bodyparser from 'body-parser';
+// import cors from 'cors';
+// import bodyparser from 'body-parser';
 
 import authRouter from './src/Routes/auth.routes.js';
 import { resolvers } from './src/resolvers.js';
