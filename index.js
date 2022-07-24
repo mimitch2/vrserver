@@ -37,6 +37,18 @@ const server = new ApolloServer({
     csrfPrevention: true,
     cache: 'bounded',
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
+    // context: ({ req }) => {
+    //     console.log('🚀 ~ file: index.js ~ line 41 ~ req', req.headers.authorization);
+    //     // get the user token from the headers
+    //     // const token = req.headers.authorization || '';
+    //     // try to retrieve a user with the token
+    //     // const user = getUser(token);
+    //     // optionally block the user
+    //     // we could also check user roles/permissions here
+    //     // if (!user) throw new AuthenticationError('you must be logged in');
+    //     // add the user to the context
+    //     // return null;
+    // }
 });
 
 await server.start();

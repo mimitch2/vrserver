@@ -53,6 +53,7 @@ type VRRelease {
 type User {
     _id: ID
     username: String!
+    token: String!
     avatarUrl: String!
     discogsUserId: Int!
     releasesRated: Int!

@@ -2,6 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import User from '../Schemas/User.schema.js';
 
 const router = express.Router();
 dotenv.config();
@@ -28,7 +29,6 @@ let discogsAccessTokenSecret;
 let discogsAccessToken;
 
 router.get('/auth', async (req, res, next) => {
-    console.log('XXXXXXXX');
     try {
         const tokenResponse = await fetch('https://api.discogs.com/oauth/request_token', {
             method: 'GET',
@@ -52,7 +52,6 @@ router.get('/auth', async (req, res, next) => {
 });
 
 router.get('/return', async (req, res, next) => {
-    console.log('ZZZZZZZZZ');
     const { oauth_verifier: oAuthVerifier } = req.query;
 
     try {
@@ -92,49 +91,32 @@ router.get('/return', async (req, res, next) => {
             const token = jwt.sign(discogsAccessToken, JWT_SECRET);
             const secret = jwt.sign(discogsAccessTokenSecret, JWT_SECRET);
             const signedUsername = jwt.sign(identity.username, JWT_SECRET);
-            // const user = await User.findOne({ username });
+            const user = await User.findOne({ username });
 
-            // if (!user) {
-            //     try {
-            //         await User.create({
-            //             username,
-            //             discogsUserId,
-            //             releasesRated: 0,
-            //             avatarUrl: userData?.avatar_url || null
-            //         });
-            //     } catch (error) {
-            //         const errorMessage = `Failed to create new user: ${error}`;
-            //         console.error(errorMessage);
-            //         res.status(500).send(errorMessage);
-            //     }
-            // } else {
-            //     user.avatarUrl = userData?.avatar_url || null;
-            //     await user.save();
-            // }
-
-            // res.cookie(
-            //   'auth',
-            //   JSON.stringify({
-            //     username: signedUsername,
-            //     token: token,
-            //     secret: secret
-            //   }),
-            //   { httpOnly: true }
-            // );
+            if (!user) {
+                try {
+                    await User.create({
+                        username,
+                        token,
+                        discogsUserId,
+                        releasesRated: 0,
+                        avatarUrl: userData?.avatar_url || null
+                    });
+                } catch (error) {
+                    const errorMessage = `Failed to create new user: ${error}`;
+                    console.error(errorMessage);
+                    res.status(500).send(errorMessage);
+                }
+            } else {
+                user.avatarUrl = userData?.avatar_url || null;
+                await user.save();
+            }
 
             const cookie = JSON.stringify({
                 username: signedUsername,
                 token,
                 secret
             });
-
-            // console.log(
-            //   JSON.stringify({
-            //     username: signedUsername,
-            //     token: token,
-            //     secret: secret
-            //   })
-            // );
 
             res.redirect(`vinylratings://home?auth=${cookie}`);
             // res.redirect(`http://localhost:3000`);

@@ -10,6 +10,10 @@ const userSchema = new Schema(
             lowercase: true,
             required: true
         },
+        token: {
+            type: String,
+            required: true
+        },
         avatarUrl: {
             type: String
         },
