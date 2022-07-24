@@ -31,13 +31,12 @@ const addRelease = async (__, args) => {
     return release;
 };
 
-const getUser = async (parent, { username }) => {
-    console.log('🚀 ~ file: resolvers.js ~ line 35 ~ getUser ~ parent', parent);
-    // console.log('🚀 ~ file: resolvers.js ~ line 34 ~ getUser ~ auth', auth);
-    // const parsedAuth = JSON.parse(auth);
-    // const username = jwt.verify(parsedAuth.username, process.env.JWT_SECRET);
+const getUser = async (parent, { auth }) => {
+    console.log('🚀 ~ file: resolvers.js ~ line 34 ~ getUser ~ auth', auth);
+    const parsedAuth = JSON.parse(auth);
+    const parsedUsername = jwt.verify(parsedAuth.username, process.env.JWT_SECRET);
 
-    const user = await User.findOne({ username }).populate({
+    const user = await User.findOne({ username: parsedUsername }).populate({
         path: 'vinylRatings',
         populate: {
             path: 'user'

@@ -63,7 +63,7 @@ type User {
 type Query {
     getCollection: Collection!
     getRelease(releaseId: Int!): VRRelease!
-    getUser(username: String!): User!
+    getUser(auth: String!): User!
 }
 
 type Mutation {
