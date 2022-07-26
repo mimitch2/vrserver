@@ -44,7 +44,6 @@ router.get('/auth', async (req, res, next) => {
         const params = new URLSearchParams(token);
         discogsAuthRequestToken = params.get('oauth_token');
         discogsAuthTokenSecret = params.get('oauth_token_secret');
-        console.log(discogsAuthRequestToken);
         res.send(`https://discogs.com/oauth/authorize?oauth_token=${discogsAuthRequestToken}`);
     } catch (error) {
         next(res.status(500).send('Internal Server Error'));
@@ -119,7 +118,6 @@ router.get('/return', async (req, res, next) => {
             });
 
             res.redirect(`vinylratings://home?auth=${cookie}`);
-            // res.redirect(`http://localhost:3000`);
         }
     } catch (error) {
         next(res.status(500).send('Internal Server Error'));

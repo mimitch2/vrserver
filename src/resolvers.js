@@ -31,8 +31,10 @@ const addRelease = async (__, args) => {
     return release;
 };
 
-const getUser = async (parent, { auth }) => {
-    console.log('🚀 ~ file: resolvers.js ~ line 34 ~ getUser ~ auth', auth);
+const getUser = async (__, { auth }) => {
+    if (!auth) {
+        return null;
+    }
     const parsedAuth = JSON.parse(auth);
     const parsedUsername = jwt.verify(parsedAuth.username, process.env.JWT_SECRET);
 
