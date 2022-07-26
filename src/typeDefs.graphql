@@ -1,0 +1,80 @@
+type Pagination {
+    items: Int!
+    page: Int!
+    pages: Int!
+    per_page: Int!
+}
+
+type BasicInformation {
+    title: String!
+    thumb: String!
+}
+
+type Release {
+    title: String!
+    thumb: String
+    artists_sort: String
+}
+
+type Releases {
+    basic_information: BasicInformation!
+}
+
+type Collection {
+    pagination: Pagination!
+    releases: [Releases]!
+}
+
+type VRRating {
+    quietness: Float!
+    flatness: Float!
+    clarity: Float!
+    rating: Float
+    createdAt: String
+    notes: String
+    release: String
+    updatedAt: String
+    user: User
+}
+
+type VRRelease {
+    title: String
+    artist: String
+    avgQuietness: Float
+    avgFlatness: Float
+    avgClarity: Float
+    avgRating: Float
+    ratingsCount: Int
+    currentUserRating: VRRating
+    vinylRatings: [VRRating]
+    washedAt: String
+}
+
+type User {
+    _id: ID
+    username: String!
+    token: String!
+    avatarUrl: String!
+    discogsUserId: Int!
+    releasesRated: Int!
+    vinylRatings: [VRRating]
+}
+
+type Query {
+    getCollection: Collection!
+    getRelease(releaseId: Int!): VRRelease!
+    getUser(auth: String!): User!
+}
+
+type Mutation {
+    addRelease(
+        releaseId: Int!
+        title: String!
+        artist: String!
+        avgQuietness: Float!
+        avgFlatness: Float!
+        avgClarity: Float!
+        avgRating: Float!
+        ratingsCount: Int!
+    ): VRRelease
+}
