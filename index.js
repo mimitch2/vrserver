@@ -1,9 +1,11 @@
 import { ApolloServer } from 'apollo-server-express';
-import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
+import { ApolloServerPluginDrainHttpServer, AuthenticationError } from 'apollo-server-core';
 import { readFileSync } from 'fs';
 import express from 'express';
 import http from 'http';
 import mongoose from 'mongoose';
+import { getDiscogsHeadersAndUsername, generateQueryParams } from './src/helpers/auth.helpers.js';
+
 // import cors from 'cors';
 // import bodyparser from 'body-parser';
 
@@ -36,19 +38,20 @@ const server = new ApolloServer({
     resolvers,
     csrfPrevention: true,
     cache: 'bounded',
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
-    // context: ({ req }) => {
-    //     console.log('🚀 ~ file: index.js ~ line 41 ~ req', req.headers.authorization);
-    //     // get the user token from the headers
-    //     // const token = req.headers.authorization || '';
-    //     // try to retrieve a user with the token
-    //     // const user = getUser(token);
-    //     // optionally block the user
-    //     // we could also check user roles/permissions here
-    //     // if (!user) throw new AuthenticationError('you must be logged in');
-    //     // add the user to the context
-    //     // return null;
-    // }
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    context: ({ req }) => {
+        const token = req?.headers?.authorization ?? '';
+
+        if (token) {
+            const json = token.split(' ')[1];
+            const parsedAuth = JSON.parse(json);
+            const { username, Authorization } = getDiscogsHeadersAndUsername({ auth: parsedAuth });
+
+            return { username, Authorization };
+        }
+
+        throw new AuthenticationError('you must be logged in');
+    }
 });
 
 await server.start();
