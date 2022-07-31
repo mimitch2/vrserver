@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import Rating from './Schemas/Rating.schema.js';
 import Release from './Schemas/Releases.schema.js';
 import User from './Schemas/User.schema.js';
-import { generateQueryParams } from './helpers/auth.helpers.js';
+import { generateQueryParams } from './helpers/helpers.js';
 
 const getCollection = async (__, { folder, page, per_page }, context) => {
     const queryParams = generateQueryParams({ params: { page, per_page } });

@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import express from 'express';
 import http from 'http';
 import mongoose from 'mongoose';
-import { getDiscogsHeadersAndUsername, generateQueryParams } from './src/helpers/auth.helpers.js';
+import { getDiscogsHeadersAndUsername } from './src/helpers/helpers.js';
 
 // import cors from 'cors';
 // import bodyparser from 'body-parser';
