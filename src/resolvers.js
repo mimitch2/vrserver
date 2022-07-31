@@ -6,7 +6,7 @@ import Release from './Schemas/Releases.schema.js';
 import User from './Schemas/User.schema.js';
 import { generateQueryParams } from './helpers/helpers.js';
 
-const getCollection = async (__, { folder, page, per_page }, context) => {
+const getCollection = async (__, { folder, page, per_page, offset, limit }, context) => {
     const queryParams = generateQueryParams({ params: { page, per_page } });
     const { username, Authorization } = context;
 
@@ -18,6 +18,7 @@ const getCollection = async (__, { folder, page, per_page }, context) => {
             }
         }
     );
+
     const result = await response.json();
 
     return result;

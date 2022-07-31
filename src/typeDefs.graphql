@@ -17,6 +17,8 @@ type Release {
 }
 
 type Releases {
+    id: ID!
+    date_added: String!
     basic_information: BasicInformation!
 }
 
@@ -61,7 +63,7 @@ type User {
 }
 
 type Query {
-    getCollection(folder: Int, page: Int, per_page: Int): Collection!
+    getCollection(folder: Int, page: Int, per_page: Int, offset: Int, limit: Int): Collection!
     getRelease(releaseId: Int!): VRRelease!
     getUser(auth: String!): User!
 }
