@@ -6,8 +6,15 @@ import Release from './Schemas/Releases.schema.js';
 import User from './Schemas/User.schema.js';
 import { generateQueryParams } from './helpers/helpers.js';
 
-const getCollection = async (__, { folder, page, per_page, offset, limit }, context) => {
-    const queryParams = generateQueryParams({ params: { page, per_page } });
+const getCollection = async (__, { folder, page, per_page, sort, sort_order }, context) => {
+    const queryParams = generateQueryParams({
+        params: {
+            page,
+            per_page,
+            sort,
+            sort_order
+        }
+    });
     const { username, Authorization } = context;
 
     const response = await fetch(
@@ -24,10 +31,56 @@ const getCollection = async (__, { folder, page, per_page, offset, limit }, cont
     return result;
 };
 
-const getRelease = async (__, { releaseId }) => {
-    const release = await Release.findOne({ releaseId });
+const getRelease = async (__, { id }, context) => {
+    const { username, Authorization } = context;
 
-    return release;
+    try {
+        const response = await fetch(`${process.env.DISCOGS_ENDPOINT}/releases/${id}`, {
+            headers: { Authorization }
+        });
+
+        const discogsRelease = await response.json();
+        const release = await Release.findOne({ releaseId: id });
+
+        if (release) {
+            await release.populate({
+                path: 'vinylRatings',
+                populate: {
+                    path: 'user'
+                }
+            });
+            const user = await User.findOne({ username });
+            const userRating = await Rating.findOne({ user });
+            const {
+                artist,
+                title,
+                ratingsCount,
+                overallRatingAverage,
+                flatnessAverage,
+                quietnessAverage,
+                physicalConditionAverage
+            } = release;
+
+            return {
+                ...discogsRelease,
+                vinylRatingsRelease: {
+                    artist,
+                    title,
+                    ratingsCount,
+                    overallRatingAverage,
+                    flatnessAverage,
+                    quietnessAverage,
+                    physicalConditionAverage,
+                    currentUserRating: userRating || null,
+                    vinylRatings: release.vinylRatings
+                }
+            };
+        }
+        return { ...discogsRelease, vinylRatingsRelease: null };
+    } catch (error) {
+        console.log('🚀 ~ file: resolvers.js ~ line 73 ~ getRelease ~ error', error);
+    }
+    return null;
 };
 
 const addRelease = async (__, args) => {

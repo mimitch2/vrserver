@@ -5,15 +5,38 @@ type Pagination {
     per_page: Int!
 }
 
+type Artist {
+    name: String
+}
+
+type Format {
+    qty: String
+    text: String
+    name: String
+    descriptions: [String]
+}
+
 type BasicInformation {
     title: String!
     thumb: String!
+    artists: [Artist]!
+    year: Int
+    formats: [Format]
 }
 
 type Release {
     title: String!
-    thumb: String
+    thumb: String!
     artists_sort: String
+    artists: [Artist]!
+    vinylRatingsRelease: VRRelease
+    images: [Image]!
+}
+
+type Image {
+    resource_url: String!
+    height: Int
+    width: Int
 }
 
 type Releases {
@@ -63,8 +86,16 @@ type User {
 }
 
 type Query {
-    getCollection(folder: Int, page: Int, per_page: Int, offset: Int, limit: Int): Collection!
-    getRelease(releaseId: Int!): VRRelease!
+    getCollection(
+        folder: Int
+        page: Int
+        per_page: Int
+        sort: String
+        sort_order: String
+        offset: Int
+        limit: Int
+    ): Collection!
+    getRelease(id: Int!): Release
     getUser(auth: String!): User!
 }
 
