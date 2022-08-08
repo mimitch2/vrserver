@@ -6,7 +6,25 @@ import Release from './Schemas/Releases.schema.js';
 import User from './Schemas/User.schema.js';
 import { generateQueryParams } from './helpers/helpers.js';
 
+const getFolders = async (_, __, context) => {
+    const { username, Authorization } = context;
+
+    const response = await fetch(
+        `${process.env.DISCOGS_ENDPOINT}/users/${username}/collection/folders`,
+        {
+            headers: {
+                Authorization
+            }
+        }
+    );
+
+    const result = await response.json();
+
+    return result.folders || [];
+};
+
 const getCollection = async (__, { folder, page, per_page, sort, sort_order }, context) => {
+    console.log('🚀 ~ file: resolvers.js ~ line 27 ~ getCollection ~ folder', folder);
     const queryParams = generateQueryParams({
         params: {
             page,
@@ -107,7 +125,12 @@ const getUser = async (__, { auth }) => {
 };
 
 export const resolvers = {
-    Query: { getCollection, getRelease, getUser },
+    Query: {
+        getFolders,
+        getCollection,
+        getRelease,
+        getUser
+    },
     Mutation: {
         addRelease
     }

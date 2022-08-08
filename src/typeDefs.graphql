@@ -85,7 +85,14 @@ type User {
     vinylRatings: [VRRating]
 }
 
+type Folder {
+    id: Int!
+    name: String!
+    count: Int!
+}
+
 type Query {
+    getFolders: [Folder]!
     getCollection(
         folder: Int
         page: Int
