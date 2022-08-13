@@ -2,6 +2,7 @@
 /* eslint-disable no-multi-assign */
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
+import Rating from '../Schemas/Rating.schema.js';
 
 export const generateQueryParams = ({ params }) =>
     // eslint-disable-next-line implicit-arrow-linebreak
@@ -44,38 +45,43 @@ export const updateRelease = async ({ ratings = null, release, releaseData }) =>
         await release.save();
         return;
     }
+
+    const releaseRatings = await Rating.find({ release });
+
+    const ratingTypeTotals = releaseRatings.reduce(
+        (result, rating) => {
+            result.quietness += rating.quietness;
+            result.clarity += rating.clarity;
+            result.flatness += rating.flatness;
+            result.total = result.total + rating.quietness + rating.clarity + rating.flatness;
+
+            return result;
+        },
+        {
+            quietness: 0,
+            flatness: 0,
+            clarity: 0,
+            total: 0
+        }
+    );
+
     const ratingTypeCount = Object.keys(ratings).length;
-
-    const { ratingAvg } = release;
-
     const newRatingsTotal = _.reduce(ratings, (sum, value) => sum + value, 0);
     const newRatingsAvg = +(newRatingsTotal / ratingTypeCount).toFixed(1);
     const newRatingsCount = +(release.ratingsCount += 1);
+    const hasBeenRated = newRatingsCount > 1;
 
-    const overallAverage =
-        newRatingsCount > 1 ? +((newRatingsAvg + ratingAvg) / 2).toFixed(1) : newRatingsAvg;
-
-    // console.log(
-    //     'newRatingsCount: ',
-    //     newRatingsCount,
-    //     'newRatingsAvg: ',
-    //     newRatingsAvg,
-    //     'ratingAvg: ',
-    //     ratingAvg,
-    //     'newRatingsTotal: ',
-    //     newRatingsTotal,
-    //     'overallAverage: ',
-    //     overallAverage
-    // );
-
-    release.ratingAvg = overallAverage;
+    release.ratingAvg = hasBeenRated
+        ? (ratingTypeTotals.total / newRatingsCount / ratingTypeCount).toFixed(1)
+        : newRatingsAvg;
     release.ratingsCount = newRatingsCount;
 
-    _.forEach(ratings, (value, key) => {
+    _.forEach(ratingTypeTotals, (value, key) => {
+        if (key === 'total') {
+            return false;
+        }
         const averageKey = `${key}Avg`;
-        const average = (newRatingsCount > 1 ? (value + release[averageKey]) / 2 : value).toFixed(
-            1
-        );
+        const average = (hasBeenRated ? value / newRatingsCount : value).toFixed(1);
 
         release[averageKey] = average;
     });
