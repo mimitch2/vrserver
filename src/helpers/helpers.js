@@ -44,20 +44,31 @@ export const updateRelease = async ({ ratings = null, release, releaseData }) =>
         await release.save();
         return;
     }
-    const numberOfRatings = Object.keys(ratings).length;
+    const ratingTypeCount = Object.keys(ratings).length;
 
     const { ratingAvg } = release;
 
-    const newRatingsTotal = ratings.reduce((sum, rating) => sum + rating, 0);
-    const newRatingsOverallAverage = (newRatingsTotal / numberOfRatings).toFixed(1);
-    const newRatingsCount = (release.ratingsCount += 1);
+    const newRatingsTotal = _.reduce(ratings, (sum, value) => sum + value, 0);
+    const newRatingsAvg = +(newRatingsTotal / ratingTypeCount).toFixed(1);
+    const newRatingsCount = +(release.ratingsCount += 1);
 
     const overallAverage =
-        newRatingsCount > 1
-            ? ((newRatingsOverallAverage + ratingAvg) / 2).toFixed(1)
-            : newRatingsOverallAverage;
+        newRatingsCount > 1 ? +((newRatingsAvg + ratingAvg) / 2).toFixed(1) : newRatingsAvg;
 
-    release.overallRatingAverage = overallAverage;
+    // console.log(
+    //     'newRatingsCount: ',
+    //     newRatingsCount,
+    //     'newRatingsAvg: ',
+    //     newRatingsAvg,
+    //     'ratingAvg: ',
+    //     ratingAvg,
+    //     'newRatingsTotal: ',
+    //     newRatingsTotal,
+    //     'overallAverage: ',
+    //     overallAverage
+    // );
+
+    release.ratingAvg = overallAverage;
     release.ratingsCount = newRatingsCount;
 
     _.forEach(ratings, (value, key) => {

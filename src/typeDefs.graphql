@@ -52,6 +52,12 @@ type Collection {
     releases: [Releases]!
 }
 
+input Ratings {
+    quietness: Float!
+    flatness: Float!
+    clarity: Float!
+}
+
 type VRRating {
     quietness: Float!
     flatness: Float!
@@ -110,5 +116,12 @@ type Query {
 }
 
 type Mutation {
-    addRelease(releaseId: Int!, title: String!, artist: String!): VRRelease
+    addRelease(releaseId: Int!, title: String!, artist: String!): VRRelease!
+    addRating(
+        releaseId: Int!
+        quietness: Int!
+        clarity: Int!
+        flatness: Int!
+        notes: String
+    ): VRRating!
 }

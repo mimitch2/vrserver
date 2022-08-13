@@ -112,7 +112,8 @@ const addRelease = async (__, { releaseId, title, artist }) => {
     return release;
 };
 
-const addRating = async (__, { releaseId, ratings, notes }, context) => {
+const addRating = async (__, { releaseId, clarity, quietness, flatness, notes }, context) => {
+    const ratings = { clarity, quietness, flatness };
     const { username } = context;
     const user = await User.findOne({ username });
     const release = await Release.findOne({ releaseId });
@@ -168,6 +169,7 @@ export const resolvers = {
         getUser
     },
     Mutation: {
-        addRelease
+        addRelease,
+        addRating
     }
 };
