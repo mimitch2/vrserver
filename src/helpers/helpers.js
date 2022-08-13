@@ -36,40 +36,37 @@ export const getDiscogsHeadersAndUsername = ({ auth }) => {
     };
 };
 
-export const updateRelease = async ({ stars = null, release, releaseData }) => {
-    if (!stars) {
+export const updateRelease = async ({ ratings = null, release, releaseData }) => {
+    if (!ratings) {
         _.forEach(releaseData, (value, key) => {
             release[key] = value;
         });
         await release.save();
         return;
     }
-    const numberOfStars = Object.keys(stars).length;
+    const numberOfRatings = Object.keys(ratings).length;
 
-    release.ratingsCount = release.ratingsCount += 1;
-    const { overallRatingTotal, ratingsCount } = release;
-    const { quietness, flatness, clarity } = stars;
+    const { ratingAvg } = release;
 
-    const newRatingsTotal = quietness + flatness + clarity;
-    const newRatingsOverallAverage = (newRatingsTotal / numberOfStars).toFixed(1);
+    const newRatingsTotal = ratings.reduce((sum, rating) => sum + rating, 0);
+    const newRatingsOverallAverage = (newRatingsTotal / numberOfRatings).toFixed(1);
+    const newRatingsCount = (release.ratingsCount += 1);
 
     const overallAverage =
-        ratingsCount > 1
-            ? ((overallRatingTotal + newRatingsTotal) / ratingsCount / numberOfStars).toFixed(1)
+        newRatingsCount > 1
+            ? ((newRatingsOverallAverage + ratingAvg) / 2).toFixed(1)
             : newRatingsOverallAverage;
 
     release.overallRatingAverage = overallAverage;
-    release.overallRatingTotal += newRatingsTotal;
+    release.ratingsCount = newRatingsCount;
 
-    _.forEach(stars, (value, key) => {
-        const averageKey = `${key}Average`;
-        const totalKey = `${key}Total`;
-        const average = (
-            ratingsCount > 1 ? (value + release[totalKey]) / ratingsCount : value
-        ).toFixed(1);
+    _.forEach(ratings, (value, key) => {
+        const averageKey = `${key}Avg`;
+        const average = (newRatingsCount > 1 ? (value + release[averageKey]) / 2 : value).toFixed(
+            1
+        );
 
         release[averageKey] = average;
-        release[totalKey] = release[totalKey] += value;
     });
 
     await release.save();

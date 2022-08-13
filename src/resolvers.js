@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import Rating from './Schemas/Rating.schema.js';
 import Release from './Schemas/Releases.schema.js';
 import User from './Schemas/User.schema.js';
-import { generateQueryParams } from './helpers/helpers.js';
+import { generateQueryParams, updateRelease } from './helpers/helpers.js';
 
 const getFolders = async (_, __, context) => {
     const { username, Authorization } = context;
@@ -24,7 +24,6 @@ const getFolders = async (_, __, context) => {
 };
 
 const getCollection = async (__, { folder, page, per_page, sort, sort_order }, context) => {
-    console.log('🚀 ~ file: resolvers.js ~ line 27 ~ getCollection ~ folder', folder);
     const queryParams = generateQueryParams({
         params: {
             page,
@@ -73,10 +72,11 @@ const getRelease = async (__, { id }, context) => {
                 artist,
                 title,
                 ratingsCount,
-                overallRatingAverage,
-                flatnessAverage,
-                quietnessAverage,
-                physicalConditionAverage
+                ratingAvg,
+                quietnessAvg,
+                flatnessAvg,
+                clarityAvg,
+                washedAt
             } = release;
 
             return {
@@ -85,10 +85,11 @@ const getRelease = async (__, { id }, context) => {
                     artist,
                     title,
                     ratingsCount,
-                    overallRatingAverage,
-                    flatnessAverage,
-                    quietnessAverage,
-                    physicalConditionAverage,
+                    ratingAvg,
+                    quietnessAvg,
+                    flatnessAvg,
+                    clarityAvg,
+                    washedAt,
                     currentUserRating: userRating || null,
                     vinylRatings: release.vinylRatings
                 }
@@ -101,10 +102,45 @@ const getRelease = async (__, { id }, context) => {
     return null;
 };
 
-const addRelease = async (__, args) => {
-    const release = await Release.create({ ...args });
+const addRelease = async (__, { releaseId, title, artist }) => {
+    let release = await Release.findOne({ releaseId });
+
+    if (!release) {
+        release = await Release.create({ releaseId, title, artist });
+    }
 
     return release;
+};
+
+const addRating = async (__, { releaseId, ratings, notes }, context) => {
+    const { username } = context;
+    const user = await User.findOne({ username });
+    const release = await Release.findOne({ releaseId });
+
+    try {
+        const rating = await Rating.create({
+            ...ratings,
+            notes,
+            release,
+            user
+        });
+
+        await updateRelease({
+            ratings,
+            notes,
+            release
+        });
+
+        user.releasesRated = user.releasesRated += 1;
+        await user.save();
+
+        return rating;
+    } catch (error) {
+        const errorMessage = `Failed to create rating: ${error}`;
+        console.error(errorMessage);
+    }
+
+    return null;
 };
 
 const getUser = async (__, { auth }) => {

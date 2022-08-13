@@ -21,7 +21,7 @@ type BasicInformation {
     thumb: String!
     artists: [Artist]!
     year: Int
-    formats: [Format]
+    formats: [Format]!
 }
 
 type Release {
@@ -29,6 +29,8 @@ type Release {
     thumb: String!
     artists_sort: String
     artists: [Artist]!
+    formats: [Format]!
+    year: Int
     vinylRatingsRelease: VRRelease
     images: [Image]!
 }
@@ -63,13 +65,14 @@ type VRRating {
 }
 
 type VRRelease {
-    title: String
-    artist: String
-    avgQuietness: Float
-    avgFlatness: Float
-    avgClarity: Float
-    avgRating: Float
-    ratingsCount: Int
+    releaseId: Int!
+    title: String!
+    artist: String!
+    quietnessAvg: Float!
+    flatnessAvg: Float!
+    clarityAvg: Float!
+    ratingAvg: Float!
+    ratingsCount: Int!
     currentUserRating: VRRating
     vinylRatings: [VRRating]
     washedAt: String
@@ -107,14 +110,5 @@ type Query {
 }
 
 type Mutation {
-    addRelease(
-        releaseId: Int!
-        title: String!
-        artist: String!
-        avgQuietness: Float!
-        avgFlatness: Float!
-        avgClarity: Float!
-        avgRating: Float!
-        ratingsCount: Int!
-    ): VRRelease
+    addRelease(releaseId: Int!, title: String!, artist: String!): VRRelease
 }

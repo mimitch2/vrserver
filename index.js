@@ -6,11 +6,18 @@ import http from 'http';
 import mongoose from 'mongoose';
 import { getDiscogsHeadersAndUsername } from './src/helpers/helpers.js';
 
+import authRouter from './src/Routes/auth.routes.js';
+import { resolvers } from './src/resolvers.js';
+
 // import cors from 'cors';
 // import bodyparser from 'body-parser';
 
-import authRouter from './src/Routes/auth.routes.js';
-import { resolvers } from './src/resolvers.js';
+// const key = readFileSync('./src/certs/selfsigned.key');
+// const cert = readFileSync('./src/certs/selfsigned.crt');
+// const options = {
+//     key,
+//     cert
+// };
 
 mongoose.Promise = global.Promise;
 
@@ -40,10 +47,10 @@ const server = new ApolloServer({
     cache: 'bounded',
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     context: ({ req }) => {
-        const token = req?.headers?.authorization ?? '';
+        const auth = req?.headers?.authorization ?? '';
 
-        if (token) {
-            const json = token.split(' ')[1];
+        if (auth) {
+            const json = auth.split(' ')[1];
             const parsedAuth = JSON.parse(json);
             const { username, Authorization } = getDiscogsHeadersAndUsername({ auth: parsedAuth });
 
@@ -59,5 +66,6 @@ await server.start();
 server.applyMiddleware({ app });
 
 // eslint-disable-next-line no-promise-executor-return
-await new Promise((resolve) => httpServer.listen({ port: process.env.PORT }, resolve));
-console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
+httpServer.listen(process.env.PORT, '192.168.4.89', () => {
+    console.log(`🚀 Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`);
+});

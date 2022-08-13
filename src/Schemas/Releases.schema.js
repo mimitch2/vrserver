@@ -23,21 +23,22 @@ const releaseSchema = new Schema(
             required: true,
             default: 0
         },
-        avgRating: {
-            type: FloatType,
-            required: true
-        },
-        avgQuietness: {
+        ratingAvg: {
             type: FloatType,
             required: true,
             default: 0
         },
-        avgFlatness: {
+        quietnessAvg: {
             type: FloatType,
             required: true,
             default: 0
         },
-        avgClarity: {
+        flatnessAvg: {
+            type: FloatType,
+            required: true,
+            default: 0
+        },
+        clarityAvg: {
             type: FloatType,
             required: true,
             default: 0
