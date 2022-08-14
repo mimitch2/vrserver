@@ -70,6 +70,11 @@ type VRRating {
     user: User
 }
 
+type UserCopy {
+    releaseId: Int
+    washedOn: String
+}
+
 type VRRelease {
     releaseId: Int!
     title: String!
@@ -79,9 +84,9 @@ type VRRelease {
     clarityAvg: Float!
     ratingAvg: Float!
     ratingsCount: Int!
+    userCopy: UserCopy
     currentUserRating: VRRating
     vinylRatings: [VRRating]
-    washedAt: String
 }
 
 type User {
@@ -98,6 +103,11 @@ type Folder {
     id: Int!
     name: String!
     count: Int!
+}
+
+type UserCopy {
+    releaseId: Int
+    washedOn: String
 }
 
 type Query {
@@ -123,5 +133,6 @@ type Mutation {
         clarity: Int!
         flatness: Int!
         notes: String
-    ): VRRating!
+    ): VRRating
+    addWashedOn(releaseId: Int!, washedOn: String!): UserCopy
 }

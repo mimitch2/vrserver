@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import Rating from './Schemas/Rating.schema.js';
 import Release from './Schemas/Releases.schema.js';
 import User from './Schemas/User.schema.js';
+import UserCopy from './Schemas/UserCopy.schema.js';
+
 import { generateQueryParams, updateRelease } from './helpers/helpers.js';
 
 const getFolders = async (_, __, context) => {
@@ -57,17 +59,17 @@ const getRelease = async (__, { id }, context) => {
         });
 
         const discogsRelease = await response.json();
-        const release = await Release.findOne({ releaseId: id });
+        const release = await Release.findOne({ releaseId: id }).populate({
+            path: 'vinylRatings',
+            populate: {
+                path: 'user'
+            }
+        });
 
         if (release) {
-            await release.populate({
-                path: 'vinylRatings',
-                populate: {
-                    path: 'user'
-                }
-            });
             const user = await User.findOne({ username });
             const userRating = await Rating.findOne({ user });
+
             const {
                 artist,
                 title,
@@ -75,8 +77,7 @@ const getRelease = async (__, { id }, context) => {
                 ratingAvg,
                 quietnessAvg,
                 flatnessAvg,
-                clarityAvg,
-                washedAt
+                clarityAvg
             } = release;
 
             return {
@@ -89,9 +90,8 @@ const getRelease = async (__, { id }, context) => {
                     quietnessAvg,
                     flatnessAvg,
                     clarityAvg,
-                    washedAt,
                     currentUserRating: userRating || null,
-                    vinylRatings: release.vinylRatings
+                    vinylRatings: release.vinylRatings || null
                 }
             };
         }
@@ -103,11 +103,20 @@ const getRelease = async (__, { id }, context) => {
 };
 
 const addRelease = async (__, { releaseId, title, artist }) => {
+    let userCopy = await UserCopy.findOne({ releaseId });
     let release = await Release.findOne({ releaseId });
 
     if (!release) {
         release = await Release.create({ releaseId, title, artist });
     }
+
+    if (!userCopy) {
+        userCopy = await UserCopy.create({ releaseId, washedOn: '', release });
+    }
+
+    await release.populate({
+        path: 'userCopy'
+    });
 
     return release;
 };
@@ -144,6 +153,20 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
     return null;
 };
 
+const addWashedOn = async (__, { releaseId, washedOn }) => {
+    let userCopy = await UserCopy.findOne({ releaseId });
+
+    if (!userCopy) {
+        userCopy = await UserCopy.create({ releaseId, washedOn });
+    }
+
+    userCopy.washedOn = washedOn;
+
+    await userCopy.save();
+
+    return userCopy;
+};
+
 const getUser = async (__, { auth }) => {
     if (!auth) {
         return null;
@@ -170,6 +193,7 @@ export const resolvers = {
     },
     Mutation: {
         addRelease,
-        addRating
+        addRating,
+        addWashedOn
     }
 };

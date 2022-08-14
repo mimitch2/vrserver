@@ -42,10 +42,6 @@ const releaseSchema = new Schema(
             type: FloatType,
             required: true,
             default: 0
-        },
-        washedAt: {
-            type: Date,
-            default: null
         }
     },
     { timestamps: true }
@@ -59,6 +55,12 @@ releaseSchema.virtual('vinylRatings', {
 
 releaseSchema.virtual('currentUserRating', {
     ref: 'Rating',
+    localField: '_id',
+    foreignField: 'release'
+});
+
+releaseSchema.virtual('userCopy', {
+    ref: 'UserCopy',
     localField: '_id',
     foreignField: 'release'
 });
