@@ -36,8 +36,8 @@ router.get('/auth', async (req, res, next) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}",oauth_nonce="${Date.now()}",oauth_version="1.0",oauth_signature="${consumerSecret}&", oauth_callback="http://${
                     req.hostname
-                }:${process.env.PORT}/return"`
-            }
+                }:${process.env.PORT}/return"`,
+            },
         });
 
         const token = await tokenResponse.text();
@@ -58,8 +58,8 @@ router.get('/return', async (req, res, next) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_nonce="${Date.now()}",oauth_token="${discogsAuthRequestToken}", oauth_signature=${consumerSecret}&${discogsAuthTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}",oauth_verifier="${oAuthVerifier}"`
-            }
+                Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_nonce="${Date.now()}",oauth_token="${discogsAuthRequestToken}", oauth_signature=${consumerSecret}&${discogsAuthTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}",oauth_verifier="${oAuthVerifier}"`,
+            },
         });
 
         const responseToken = await tokenResponse.text();
@@ -70,8 +70,8 @@ router.get('/return', async (req, res, next) => {
         const identityResponse = await fetch('https://api.discogs.com/oauth/identity', {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`
-            }
+                Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`,
+            },
         });
         const identity = await identityResponse.json();
         const { username } = identity;
@@ -80,8 +80,8 @@ router.get('/return', async (req, res, next) => {
         const userResponse = await fetch(`https://api.discogs.com/users/${username}`, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`
-            }
+                Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`,
+            },
         });
 
         const userData = await userResponse.json();
@@ -99,7 +99,7 @@ router.get('/return', async (req, res, next) => {
                         token,
                         discogsUserId,
                         releasesRated: 0,
-                        avatarUrl: userData?.avatar_url || null
+                        avatarUrl: userData?.avatar_url || null,
                     });
                 } catch (error) {
                     const errorMessage = `Failed to create new user: ${error}`;
@@ -114,7 +114,7 @@ router.get('/return', async (req, res, next) => {
             const cookie = JSON.stringify({
                 username: signedUsername,
                 token,
-                secret
+                secret,
             });
 
             res.redirect(`vinylratings://home?auth=${cookie}`);

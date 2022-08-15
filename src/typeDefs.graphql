@@ -73,6 +73,7 @@ type VRRating {
 type UserCopy {
     releaseId: Int
     washedOn: String
+    username: String
 }
 
 type VRRelease {

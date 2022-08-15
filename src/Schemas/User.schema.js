@@ -36,6 +36,12 @@ userSchema.virtual('vinylRatings', {
     foreignField: 'user'
 });
 
+userSchema.virtual('userCopies', {
+    ref: 'UserCopy',
+    localField: '_id',
+    foreignField: 'user'
+});
+
 userSchema.set('toObject', { virtuals: true });
 userSchema.set('toJSON', { virtuals: true });
 

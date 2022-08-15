@@ -16,7 +16,7 @@ const ratingSchema = new Schema(
             type: Number,
             required: true
         },
-        notes: String,
+        notes: { type: String, default: '' },
         release: {
             type: Schema.Types.ObjectId,
             ref: 'Release',

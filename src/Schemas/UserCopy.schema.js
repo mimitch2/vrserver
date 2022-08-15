@@ -6,17 +6,22 @@ const userCopySchema = new Schema(
     {
         releaseId: {
             type: Number,
-            required: true
+            required: true,
         },
         washedOn: {
             type: String,
-            default: ''
+            default: '',
         },
         release: {
             type: Schema.Types.ObjectId,
             ref: 'Release',
-            required: true
-        }
+            required: true,
+        },
+        user: {
+            type: Schema.Types.ObjectId,
+            ref: 'Release',
+            required: true,
+        },
     },
     { timestamps: true }
 );
