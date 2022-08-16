@@ -6,27 +6,31 @@ const ratingSchema = new Schema(
     {
         quietness: {
             type: Number,
-            required: true
+            required: true,
         },
         flatness: {
             type: Number,
-            required: true
+            required: true,
         },
         clarity: {
             type: Number,
-            required: true
+            required: true,
+        },
+        rating: {
+            type: Number,
+            required: true,
         },
         notes: { type: String, default: '' },
         release: {
             type: Schema.Types.ObjectId,
             ref: 'Release',
-            required: true
+            required: true,
         },
         user: {
             type: Schema.Types.ObjectId,
             ref: 'User',
-            required: true
-        }
+            required: true,
+        },
     },
     { timestamps: true }
 );

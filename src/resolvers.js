@@ -110,7 +110,6 @@ const addRelease = async (__, { releaseId, title, artist }, context) => {
     const user = await User.findOne({ username });
 
     let userCopy = await UserCopy.findOne({ releaseId, user });
-    console.log('🚀 ~ file: resolvers.js ~ line 111 ~ addRelease ~ userCopy', userCopy);
     let release = await Release.findOne({ releaseId });
 
     if (!release) {
@@ -132,12 +131,14 @@ const addRelease = async (__, { releaseId, title, artist }, context) => {
 const addRating = async (__, { releaseId, clarity, quietness, flatness, notes }, context) => {
     const ratings = { clarity, quietness, flatness };
     const { username } = context;
-    const user = await User.findOne({ username });
-    const release = await Release.findOne({ releaseId });
 
     try {
+        const user = await User.findOne({ username });
+        const release = await Release.findOne({ releaseId });
+
         const rating = await Rating.create({
             ...ratings,
+            rating: ((clarity + quietness + flatness) / 3).toFixed(1),
             notes,
             release,
             user,
@@ -149,7 +150,8 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
             release,
         });
 
-        user.releasesRated = user.releasesRated += 1;
+        user.releasesRated += 1;
+
         await user.save();
 
         return rating;
