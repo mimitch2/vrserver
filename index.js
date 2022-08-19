@@ -65,6 +65,7 @@ await server.start();
 
 server.applyMiddleware({ app });
 // eslint-disable-next-line no-promise-executor-return
-httpServer.listen(process.env.PORT || 8080, () => {
-    console.log(`🚀 Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`);
+const PORT = process.env.PORT || 8080;
+httpServer.listen(PORT, () => {
+    console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
 });
