@@ -58,14 +58,13 @@ const server = new ApolloServer({
         }
 
         throw new AuthenticationError('you must be logged in');
-    }
+    },
 });
 
 await server.start();
 
 server.applyMiddleware({ app });
-
 // eslint-disable-next-line no-promise-executor-return
-httpServer.listen(process.env.PORT, '192.168.4.89', () => {
+httpServer.listen(process.env.PORT || 8080, () => {
     console.log(`🚀 Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`);
 });
