@@ -22,6 +22,8 @@ type BasicInformation {
     artists: [Artist]!
     year: Int
     formats: [Format]!
+    genres: [String]
+    styles: [String]
 }
 
 type Release {
@@ -33,6 +35,18 @@ type Release {
     year: Int
     vinylRatingsRelease: VRRelease
     images: [Image]!
+    genres: [String]
+}
+
+type Releases {
+    id: ID
+    date_added: String
+    basic_information: BasicInformation!
+}
+
+type WantListReleases {
+    rating: Int
+    basic_information: BasicInformation
 }
 
 type Image {
@@ -41,15 +55,14 @@ type Image {
     width: Int
 }
 
-type Releases {
-    id: ID!
-    date_added: String!
-    basic_information: BasicInformation!
-}
-
 type Collection {
     pagination: Pagination!
     releases: [Releases]!
+}
+
+type Wants {
+    pagination: Pagination!
+    wants: [WantListReleases]
 }
 
 input Ratings {
@@ -122,6 +135,14 @@ type Query {
         offset: Int
         limit: Int
     ): Collection!
+    getWantList(
+        page: Int
+        per_page: Int
+        sort: String
+        sort_order: String
+        offset: Int
+        limit: Int
+    ): Wants!
     getRelease(id: Int!): Release
     getUser(auth: String!): User!
 }
