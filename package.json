@@ -6,7 +6,8 @@
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon . -e graphql,js,json",
+        "dev": "nodemon . -e graphql,js,json",
+        "node": "node index.js",
         "cm": "git cz"
     },
     "repository": {
@@ -14,7 +15,7 @@
         "url": "git+https://github.com/mimitch2/vrserver.git"
     },
     "engines": {
-        "node": "16.x"
+        "node": "14.x"
     },
     "keywords": [],
     "author": "",
