@@ -30,14 +30,17 @@ let discogsAccessToken;
 
 router.get('/auth', async (req, res, next) => {
     console.log('xxxxx', req.hostname);
+
+    const callbackUrl = req.hostname.includes('vr-graph-server')
+        ? `https://${req.hostname}`
+        : `http:${req.hostname}:${process.env.PORT || 8080}`;
+
     try {
         const tokenResponse = await fetch('https://api.discogs.com/oauth/request_token', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}",oauth_nonce="${Date.now()}",oauth_version="1.0",oauth_signature="${consumerSecret}&", oauth_callback="http://${
-                    req.hostname
-                }:${process.env.PORT || 8080}/return"`,
+                Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}",oauth_nonce="${Date.now()}",oauth_version="1.0",oauth_signature="${consumerSecret}&", oauth_callback="${callbackUrl}/return"`,
             },
         });
 
