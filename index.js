@@ -64,8 +64,9 @@ const server = new ApolloServer({
 await server.start();
 
 server.applyMiddleware({ app });
-// eslint-disable-next-line no-promise-executor-return
+
 const PORT = process.env.PORT || 8080;
+
 httpServer.listen(PORT, () => {
     console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
 });

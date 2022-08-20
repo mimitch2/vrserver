@@ -29,6 +29,7 @@ let discogsAccessTokenSecret;
 let discogsAccessToken;
 
 router.get('/auth', async (req, res, next) => {
+    console.log('xxxxx', req.hostname);
     try {
         const tokenResponse = await fetch('https://api.discogs.com/oauth/request_token', {
             method: 'GET',
@@ -36,7 +37,7 @@ router.get('/auth', async (req, res, next) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}",oauth_nonce="${Date.now()}",oauth_version="1.0",oauth_signature="${consumerSecret}&", oauth_callback="http://${
                     req.hostname
-                }:${process.env.PORT}/return"`,
+                }:${process.env.PORT || 8080}/return"`,
             },
         });
 
