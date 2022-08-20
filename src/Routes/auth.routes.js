@@ -29,11 +29,10 @@ let discogsAccessTokenSecret;
 let discogsAccessToken;
 
 router.get('/auth', async (req, res, next) => {
-    console.log('xxxxx', req.hostname);
-
-    const callbackUrl = req.hostname.includes('vr-graph-server')
-        ? `https://${req.hostname}`
-        : `http:${req.hostname}:${process.env.PORT || 8080}`;
+    const callbackUrl =
+        process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging'
+            ? `https://${req.hostname}`
+            : `http://${req.hostname}:${process.env.PORT || 8080}`;
 
     try {
         const tokenResponse = await fetch('https://api.discogs.com/oauth/request_token', {
