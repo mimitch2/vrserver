@@ -9,7 +9,7 @@ import UserCopy from './Schemas/UserCopy.schema.js';
 
 import { generateQueryParams, updateRelease } from './helpers/helpers.js';
 
-const getFolders = async (_, __, context) => {
+const getFolders = async (___, __, context) => {
     const { username, Authorization } = context;
 
     const response = await fetch(
@@ -62,27 +62,36 @@ const getWantList = async (__, { page, per_page, sort, sort_order }, context) =>
     });
     const { username, Authorization } = context;
 
-    const response = await fetch(`${process.env.DISCOGS_ENDPOINT}/users/${username}/wants`, {
-        headers: {
-            Authorization,
-        },
-    });
+    try {
+        const response = await fetch(
+            `${process.env.DISCOGS_ENDPOINT}/users/${username}/wants${queryParams}`,
+            {
+                headers: {
+                    Authorization,
+                },
+            }
+        );
 
-    const result = await response.json();
+        const result = await response.json();
 
-    const { wants } = result;
+        const { wants } = result;
 
-    // const sorted = _.sortBy(wants, [
-    //     'basic_information.genres[0]',
-    //     'basic_information.artists[0].name',
-    // ]);
+        // const sorted = _.sortBy(wants, [
+        //     'basic_information.genres[0]',
+        //     'basic_information.artists[0].name',
+        // ]);
 
-    const sorted = _.sortBy(
-        wants,
-        (want) => want.basic_information.genres[0] || want.basic_information.artists[0].name
-    );
+        const sorted = _.sortBy(
+            wants,
+            (want) => want.basic_information.genres[0] || want.basic_information.artists[0].name
+        );
 
-    return { wants: sorted, pagination: result.pagination };
+        return { wants: sorted, pagination: result.pagination };
+    } catch (error) {
+        console.log('🚀 ~ file: resolvers.js ~ line 91 ~ getWantList ~ error', error);
+    }
+
+    return null;
 };
 
 const getRelease = async (__, { id }, context) => {
@@ -102,6 +111,7 @@ const getRelease = async (__, { id }, context) => {
         });
 
         if (release) {
+            console.log('🚀 ~ file: resolvers.js ~ line 114 ~ getRelease ~ release', release);
             const user = await User.findOne({ username });
             const userCopy = await UserCopy.findOne({ releaseId: id, user });
             const userRating = await Rating.findOne({ user });

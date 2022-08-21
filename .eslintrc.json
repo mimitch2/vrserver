@@ -12,6 +12,7 @@
         "indent": "off",
         "import/prefer-default-export": "off",
         "comma-dangle": "off",
-        "import/extensions": "off"
+        "import/extensions": "off",
+        "object-curly-newline": "off"
     }
 }

@@ -45,8 +45,9 @@ type Releases {
 }
 
 type WantListReleases {
-    rating: Int
-    basic_information: BasicInformation
+    id: ID
+    date_added: String
+    basic_information: BasicInformation!
 }
 
 type Image {
