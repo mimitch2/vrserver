@@ -5,7 +5,6 @@ import _ from 'lodash';
 import Rating from '../Schemas/Rating.schema.js';
 
 export const generateQueryParams = ({ params }) =>
-    // eslint-disable-next-line implicit-arrow-linebreak
     _.reduce(
         params,
         (result, val, key) => {
@@ -33,7 +32,7 @@ export const getDiscogsHeadersAndUsername = ({ auth }) => {
 
     return {
         username,
-        Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${token}", oauth_signature="${consumerSecret}&${secret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`
+        Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${token}", oauth_signature="${consumerSecret}&${secret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`,
     };
 };
 
@@ -42,7 +41,9 @@ export const updateRelease = async ({ ratings = null, release, releaseData }) =>
         _.forEach(releaseData, (value, key) => {
             release[key] = value;
         });
+
         await release.save();
+
         return;
     }
 
@@ -61,7 +62,7 @@ export const updateRelease = async ({ ratings = null, release, releaseData }) =>
             quietness: 0,
             flatness: 0,
             clarity: 0,
-            total: 0
+            total: 0,
         }
     );
 
@@ -88,3 +89,35 @@ export const updateRelease = async ({ ratings = null, release, releaseData }) =>
 
     await release.save();
 };
+
+export const sortByGenreArtist = ({ arr, sortOrder }) => {
+    const sorted = arr.sort((a, b) => {
+        const aName = a.basic_information.artists[0].name.replace('The ', '');
+        const bName = b.basic_information.artists[0].name.replace('The ', '');
+
+        return (
+            a.basic_information.genres[0].localeCompare(b.basic_information.genres[0]) ||
+            aName.localeCompare(bName)
+        );
+    });
+
+    return sorted;
+};
+
+// export const sortByGenreArtist = ({ arr, sortOrder }) => {
+//     const sorted = arr.sort((a, b) => {
+//         const firstCompare = sortOrder === 'asc' ? a : b;
+//         const secondCompare = sortOrder === 'asc' ? b : a;
+
+//         const firstName = firstCompare.basic_information.artists[0].name.replace('The ', '');
+//         const secondName = secondCompare.basic_information.artists[0].name.replace('The ', '');
+
+//         return (
+//             firstCompare.basic_information.genres[0].localeCompare(
+//                 secondCompare.basic_information.genres[0]
+//             ) || firstName.localeCompare(secondName)
+//         );
+//     });
+
+//     return sorted;
+// };

@@ -88,6 +88,7 @@ router.get('/return', async (req, res, next) => {
         });
 
         const userData = await userResponse.json();
+        console.log('🚀 ~ file: auth.routes.js ~ line 91 ~ router.get ~ userData', userData);
 
         if (discogsAccessToken && discogsAccessTokenSecret) {
             const token = jwt.sign(discogsAccessToken, JWT_SECRET);

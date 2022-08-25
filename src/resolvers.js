@@ -1,25 +1,23 @@
 /* eslint-disable camelcase */
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
-import _ from 'lodash';
+
+import { generateQueryParams, updateRelease, sortByGenreArtist } from './helpers/helpers.js';
 import Rating from './Schemas/Rating.schema.js';
 import Release from './Schemas/Release.schema.js';
 import User from './Schemas/User.schema.js';
 import UserCopy from './Schemas/UserCopy.schema.js';
 
-import { generateQueryParams, updateRelease } from './helpers/helpers.js';
+const { DISCOGS_ENDPOINT, JWT_SECRET } = process.env;
 
-const getFolders = async (___, __, context) => {
+const getFolders = async (__, ___, context) => {
     const { username, Authorization } = context;
 
-    const response = await fetch(
-        `${process.env.DISCOGS_ENDPOINT}/users/${username}/collection/folders`,
-        {
-            headers: {
-                Authorization,
-            },
-        }
-    );
+    const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/collection/folders`, {
+        headers: {
+            Authorization,
+        },
+    });
 
     const result = await response.json();
 
@@ -38,7 +36,7 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
     const { username, Authorization } = context;
 
     const response = await fetch(
-        `${process.env.DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folder}/releases${queryParams}`,
+        `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folder}/releases${queryParams}`,
         {
             headers: {
                 Authorization,
@@ -52,43 +50,44 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
 };
 
 const getWantList = async (__, { page, per_page, sort, sort_order }, context) => {
-    const queryParams = generateQueryParams({
-        params: {
-            page,
-            per_page,
-            sort,
-            sort_order,
-        },
-    });
+    const isCustomWantListSorted = sort === 'genre/artist';
+
+    const queryParams = generateQueryParams(
+        isCustomWantListSorted
+            ? {
+                  params: { page, per_page: 500, sort: 'added', sort_order },
+              }
+            : {
+                  params: {
+                      page,
+                      per_page,
+                      sort,
+                      sort_order,
+                  },
+              }
+    );
+
     const { username, Authorization } = context;
 
     try {
-        const response = await fetch(
-            `${process.env.DISCOGS_ENDPOINT}/users/${username}/wants${queryParams}`,
-            {
-                headers: {
-                    Authorization,
-                },
-            }
-        );
+        const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/wants${queryParams}`, {
+            headers: {
+                Authorization,
+            },
+        });
 
         const result = await response.json();
 
         const { wants } = result;
 
-        // const sorted = _.sortBy(wants, [
-        //     'basic_information.genres[0]',
-        //     'basic_information.artists[0].name',
-        // ]);
-
-        const sorted = _.sortBy(
-            wants,
-            (want) => want.basic_information.genres[0] || want.basic_information.artists[0].name
-        );
-
-        return { wants: sorted, pagination: result.pagination };
+        return isCustomWantListSorted
+            ? {
+                  wants: sortByGenreArtist({ arr: wants, sortOrder: sort_order }),
+                  pagination: result.pagination,
+              }
+            : result;
     } catch (error) {
-        console.log('🚀 ~ file: resolvers.js ~ line 91 ~ getWantList ~ error', error);
+        console.warn(error);
     }
 
     return null;
@@ -98,10 +97,9 @@ const getRelease = async (__, { id }, context) => {
     const { username, Authorization } = context;
 
     try {
-        const response = await fetch(`${process.env.DISCOGS_ENDPOINT}/releases/${id}`, {
+        const response = await fetch(`${DISCOGS_ENDPOINT}/releases/${id}`, {
             headers: { Authorization },
         });
-
         const discogsRelease = await response.json();
         const release = await Release.findOne({ releaseId: id }).populate({
             path: 'vinylRatings',
@@ -111,7 +109,6 @@ const getRelease = async (__, { id }, context) => {
         });
 
         if (release) {
-            console.log('🚀 ~ file: resolvers.js ~ line 114 ~ getRelease ~ release', release);
             const user = await User.findOne({ username });
             const userCopy = await UserCopy.findOne({ releaseId: id, user });
             const userRating = await Rating.findOne({ user });
@@ -209,6 +206,11 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
 };
 
 const addWashedOn = async (__, { releaseId, washedOn }) => {
+    console.log(
+        '🚀 ~ file: resolvers.js ~ line 212 ~ addWashedOn ~ releaseId, washedOn',
+        releaseId,
+        washedOn
+    );
     let userCopy = await UserCopy.findOne({ releaseId });
 
     if (!userCopy) {
@@ -227,7 +229,7 @@ const getUser = async (__, { auth }) => {
         return null;
     }
     const parsedAuth = JSON.parse(auth);
-    const parsedUsername = jwt.verify(parsedAuth.username, process.env.JWT_SECRET);
+    const parsedUsername = jwt.verify(parsedAuth.username, JWT_SECRET);
 
     const user = await User.findOne({ username: parsedUsername }).populate({
         path: 'vinylRatings',
