@@ -274,7 +274,6 @@ const getSearch = async (
     });
 
     const result = await response.json();
-    console.log('🚀 ~ file: resolvers.js ~ line 277 ~ result', result);
 
     // const withArtists = result.results.map((release) => {
     //     const splitTitle = release.title.split(' - ');
