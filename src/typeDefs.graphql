@@ -19,11 +19,23 @@ type Format {
 type BasicInformation {
     title: String!
     thumb: String!
-    artists: [Artist]!
-    year: Int
+    artists: [Artist]! | undefined
+    year: Int | String
     formats: [Format]!
-    genres: [String]
-    styles: [String]
+    genres: [String]!
+    styles: [String]!
+}
+
+type TrackList {
+    position: String!
+    title: String!
+    duration: String!
+}
+
+type Identifier {
+    type: String!
+    value: String!
+    description: String
 }
 
 type Release {
@@ -32,10 +44,16 @@ type Release {
     artists_sort: String
     artists: [Artist]!
     formats: [Format]!
-    year: Int
+    year: Int!
     vinylRatingsRelease: VRRelease
     images: [Image]!
-    genres: [String]
+    genres: [String]!
+    styles: [String]
+    tracklist: [TrackList]!
+    identifiers: [Identifier]!
+    released: String
+    notes: String
+    country: String
 }
 
 type Releases {
@@ -125,6 +143,29 @@ type UserCopy {
     washedOn: String
 }
 
+type SearchResult {
+    pagination: Pagination
+    results: [Search]
+}
+
+type SearchUserData {
+    in_collection: Boolean
+    in_wantlist: Boolean
+}
+
+type Search {
+    id: Int
+    title: String!
+    formats: [Format]
+    format: [String]
+    genres: [String]
+    style: [String]
+    thumb: String
+    year: String
+    country: String
+    user_data: SearchUserData
+}
+
 type Query {
     getFolders: [Folder]!
     getCollection(
@@ -145,6 +186,16 @@ type Query {
         limit: Int
     ): Wants!
     getRelease(id: Int!): Release
+    getSearch(
+        search: String
+        type: String
+        sort: String
+        sort_order: String
+        page: Int
+        per_page: Int
+        offset: Int
+        limit: Int
+    ): SearchResult!
     getUser(auth: String!): User!
 }
 
@@ -157,5 +208,5 @@ type Mutation {
         flatness: Int!
         notes: String
     ): VRRating
-    addWashedOn(releaseId: Int!, washedOn: String!): UserCopy
+    addWashedOn(releaseId: Int!, washedOn: String!, title: String!, artist: String!): UserCopy
 }

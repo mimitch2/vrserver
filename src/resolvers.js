@@ -21,12 +21,19 @@ const getFolders = async (__, ___, context) => {
 
     const result = await response.json();
 
+    // const formattedResults = result.folders.map(({ name, id, count }) => ({
+    //     value: id,
+    //     label: name,
+    //     count,
+    // }));
+
     return result.folders || [];
 };
 
 const getCollection = async (__, { folder, page, per_page, sort, sort_order }, context) => {
     const queryParams = generateQueryParams({
         params: {
+            format: 'Vinyl',
             page,
             per_page,
             sort,
@@ -97,10 +104,12 @@ const getRelease = async (__, { id }, context) => {
     const { username, Authorization } = context;
 
     try {
-        const response = await fetch(`${DISCOGS_ENDPOINT}/releases/${id}`, {
+        const releaseResponse = await fetch(`${DISCOGS_ENDPOINT}/releases/${id}`, {
             headers: { Authorization },
         });
-        const discogsRelease = await response.json();
+
+        const discogsRelease = await releaseResponse.json();
+
         const release = await Release.findOne({ releaseId: id }).populate({
             path: 'vinylRatings',
             populate: {
@@ -139,6 +148,7 @@ const getRelease = async (__, { id }, context) => {
                 },
             };
         }
+
         return { ...discogsRelease, vinylRatingsRelease: null };
     } catch (error) {
         console.log('🚀 ~ file: resolvers.js ~ line 73 ~ getRelease ~ error', error);
@@ -205,23 +215,85 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
     return null;
 };
 
-const addWashedOn = async (__, { releaseId, washedOn }) => {
-    console.log(
-        '🚀 ~ file: resolvers.js ~ line 212 ~ addWashedOn ~ releaseId, washedOn',
-        releaseId,
-        washedOn
-    );
-    let userCopy = await UserCopy.findOne({ releaseId });
+const addWashedOn = async (__, { releaseId, washedOn, title, artist }, context) => {
+    const { username } = context;
 
-    if (!userCopy) {
-        userCopy = await UserCopy.create({ releaseId, washedOn });
+    try {
+        const user = await User.findOne({ username });
+        let userCopy = await UserCopy.findOne({ releaseId, user });
+
+        if (!userCopy) {
+            let release = await Release.findOne({ releaseId });
+
+            if (!release) {
+                release = await Release.create({ releaseId, title, artist });
+            }
+
+            userCopy = await UserCopy.create({
+                releaseId,
+                washedOn: '',
+                release,
+                user,
+            });
+        }
+
+        userCopy.washedOn = washedOn;
+
+        await userCopy.save();
+
+        return userCopy;
+    } catch (error) {
+        console.warn(error);
     }
 
-    userCopy.washedOn = washedOn;
+    return null;
+};
 
-    await userCopy.save();
+const getSearch = async (
+    __,
+    { search, type, sort, sort_order, page, per_page, offset, limit },
+    context
+) => {
+    const queryParams = generateQueryParams({
+        params: {
+            format: 'vinyl',
+            type: 'release',
+            sort,
+            sort_order,
+            q: search,
+            page,
+            per_page,
+            offset,
+            limit,
+        },
+    });
+    const { Authorization } = context;
 
-    return userCopy;
+    const response = await fetch(`${DISCOGS_ENDPOINT}/database/search${queryParams}`, {
+        headers: { Authorization },
+    });
+
+    const result = await response.json();
+    console.log('🚀 ~ file: resolvers.js ~ line 277 ~ result', result);
+
+    // const withArtists = result.results.map((release) => {
+    //     const splitTitle = release.title.split(' - ');
+
+    //     return {
+    //         id: release.id,
+    //         basic_information: {
+    //             ...release,
+    //             artists: [{ name: splitTitle[0] }],
+    //             title: splitTitle[1],
+    //         },
+    //     };
+    // });
+
+    // const filtered = result.results.filter((release) => release.user_data.in_collection);
+
+    // return { pagination: result.pagination, results: filtered };
+    // return { pagination: result.pagination, results: withArtists };
+    return result;
 };
 
 const getUser = async (__, { auth }) => {
@@ -247,6 +319,7 @@ export const resolvers = {
         getCollection,
         getWantList,
         getRelease,
+        getSearch,
         getUser,
     },
     Mutation: {
