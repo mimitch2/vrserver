@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
+import { GraphQLScalarType, Kind } from 'graphql';
 
 import { generateQueryParams, updateRelease, sortByGenreArtist } from './helpers/helpers.js';
 import Rating from './Schemas/Rating.schema.js';
@@ -54,6 +55,50 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
     const result = await response.json();
 
     return result;
+};
+
+const getSearch = async (
+    __,
+    { search, type = 'release', sort, sort_order, page, per_page, offset, limit },
+    context
+) => {
+    const queryParams = generateQueryParams({
+        params: {
+            format: 'vinyl',
+            type,
+            sort,
+            sort_order,
+            q: search,
+            page,
+            per_page,
+            offset,
+            limit,
+        },
+    });
+    const { Authorization } = context;
+
+    const response = await fetch(`${DISCOGS_ENDPOINT}/database/search${queryParams}`, {
+        headers: { Authorization },
+    });
+
+    const result = await response.json();
+
+    const formatted = result.results.map((release) => {
+        const [artist, title] = release?.title?.split(' - ') ?? '';
+
+        return {
+            id: release.id,
+            basic_information: {
+                ...release,
+                artists: [{ name: artist || 'Unknown' }],
+                title: title || 'Unknown',
+                styles: release.style,
+                year: release.year,
+            },
+        };
+    });
+
+    return { pagination: result.pagination, results: formatted };
 };
 
 const getWantList = async (__, { page, per_page, sort, sort_order }, context) => {
@@ -249,52 +294,6 @@ const addWashedOn = async (__, { releaseId, washedOn, title, artist }, context) 
     return null;
 };
 
-const getSearch = async (
-    __,
-    { search, type, sort, sort_order, page, per_page, offset, limit },
-    context
-) => {
-    const queryParams = generateQueryParams({
-        params: {
-            format: 'vinyl',
-            type: 'release',
-            sort,
-            sort_order,
-            q: search,
-            page,
-            per_page,
-            offset,
-            limit,
-        },
-    });
-    const { Authorization } = context;
-
-    const response = await fetch(`${DISCOGS_ENDPOINT}/database/search${queryParams}`, {
-        headers: { Authorization },
-    });
-
-    const result = await response.json();
-
-    // const withArtists = result.results.map((release) => {
-    //     const splitTitle = release.title.split(' - ');
-
-    //     return {
-    //         id: release.id,
-    //         basic_information: {
-    //             ...release,
-    //             artists: [{ name: splitTitle[0] }],
-    //             title: splitTitle[1],
-    //         },
-    //     };
-    // });
-
-    // const filtered = result.results.filter((release) => release.user_data.in_collection);
-
-    // return { pagination: result.pagination, results: filtered };
-    // return { pagination: result.pagination, results: withArtists };
-    return result;
-};
-
 const getUser = async (__, { auth }) => {
     if (!auth) {
         return null;
@@ -326,4 +325,42 @@ export const resolvers = {
         addRating,
         addWashedOn,
     },
+    StringOrInt: new GraphQLScalarType({
+        name: 'StringOrInt',
+        description: 'A String or an Int union type',
+        serialize(value) {
+            if (typeof value !== 'string' && typeof value !== 'number') {
+                throw new Error('Value must be either a String or an Int');
+            }
+
+            if (typeof value === 'number' && !Number.isInteger(value)) {
+                throw new Error('Number value must be an Int');
+            }
+
+            return value;
+        },
+        parseValue(value) {
+            if (typeof value !== 'string' && typeof value !== 'number') {
+                throw new Error('Value must be either a String or an Int');
+            }
+
+            if (typeof value === 'number' && !Number.isInteger(value)) {
+                throw new Error('Number value must be an Int');
+            }
+
+            return value;
+        },
+        parseLiteral(ast) {
+            // Kinds: http://facebook.github.io/graphql/June2018/#sec-Type-Kinds
+            // ast.value is always a string
+            switch (ast.kind) {
+                case Kind.INT:
+                    return parseInt(ast.value, 10);
+                case Kind.STRING:
+                    return ast.value;
+                default:
+                    throw new Error('Value must be either a String or an Int');
+            }
+        },
+    }),
 };

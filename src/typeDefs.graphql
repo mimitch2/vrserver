@@ -9,6 +9,8 @@ type Artist {
     name: String
 }
 
+scalar StringOrInt
+
 type Format {
     qty: String
     text: String
@@ -17,13 +19,32 @@ type Format {
 }
 
 type BasicInformation {
-    title: String!
-    thumb: String!
-    artists: [Artist]! | undefined
-    year: Int | String
-    formats: [Format]!
-    genres: [String]!
-    styles: [String]!
+    id: ID!
+    title: String
+    thumb: String
+    artists: [Artist]
+    year: StringOrInt
+    country: String
+    formats: [Format]
+    genres: [String]
+    styles: [String]
+    user_data: SearchUserData
+}
+
+type SearchResult {
+    pagination: Pagination
+    results: [Releases]
+}
+
+type SearchUserData {
+    in_collection: Boolean
+    in_wantlist: Boolean
+}
+
+type Releases {
+    id: ID!
+    date_added: String
+    basic_information: BasicInformation!
 }
 
 type TrackList {
@@ -44,7 +65,7 @@ type Release {
     artists_sort: String
     artists: [Artist]!
     formats: [Format]!
-    year: Int!
+    year: StringOrInt
     vinylRatingsRelease: VRRelease
     images: [Image]!
     genres: [String]!
@@ -54,12 +75,6 @@ type Release {
     released: String
     notes: String
     country: String
-}
-
-type Releases {
-    id: ID
-    date_added: String
-    basic_information: BasicInformation!
 }
 
 type WantListReleases {
@@ -141,29 +156,6 @@ type Folder {
 type UserCopy {
     releaseId: Int
     washedOn: String
-}
-
-type SearchResult {
-    pagination: Pagination
-    results: [Search]
-}
-
-type SearchUserData {
-    in_collection: Boolean
-    in_wantlist: Boolean
-}
-
-type Search {
-    id: Int
-    title: String!
-    formats: [Format]
-    format: [String]
-    genres: [String]
-    style: [String]
-    thumb: String
-    year: String
-    country: String
-    user_data: SearchUserData
 }
 
 type Query {
