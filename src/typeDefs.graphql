@@ -32,8 +32,8 @@ type BasicInformation {
 }
 
 type SearchResult {
-    pagination: Pagination
-    results: [Releases]
+    pagination: Pagination!
+    results: [Releases]!
 }
 
 type SearchUserData {

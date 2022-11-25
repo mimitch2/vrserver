@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
-import { GraphQLScalarType, Kind } from 'graphql';
+import { GraphQLScalarType, Kind, GraphQLError } from 'graphql';
 
 import { generateQueryParams, updateRelease, sortByGenreArtist } from './helpers/helpers.js';
 import Rating from './Schemas/Rating.schema.js';
@@ -77,28 +77,31 @@ const getSearch = async (
     });
     const { Authorization } = context;
 
-    const response = await fetch(`${DISCOGS_ENDPOINT}/database/search${queryParams}`, {
-        headers: { Authorization },
-    });
+    try {
+        const response = await fetch(`${DISCOGS_ENDPOINT}/database/search${queryParams}`, {
+            headers: { Authorization },
+        });
 
-    const result = await response.json();
+        const result = await response.json();
+        const formatted = result.results.map((release) => {
+            const [artist, title] = release?.title?.split(' - ') ?? '';
 
-    const formatted = result.results.map((release) => {
-        const [artist, title] = release?.title?.split(' - ') ?? '';
+            return {
+                id: release.id,
+                basic_information: {
+                    ...release,
+                    artists: [{ name: artist || 'Unknown' }],
+                    title: title || 'Unknown',
+                    styles: release.style,
+                },
+            };
+        });
 
-        return {
-            id: release.id,
-            basic_information: {
-                ...release,
-                artists: [{ name: artist || 'Unknown' }],
-                title: title || 'Unknown',
-                styles: release.style,
-                year: release.year,
-            },
-        };
-    });
-
-    return { pagination: result.pagination, results: formatted };
+        return { pagination: result.pagination, results: formatted };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`getSearch: ${error}`);
+    }
 };
 
 const getWantList = async (__, { page, per_page, sort, sort_order }, context) => {
@@ -139,10 +142,9 @@ const getWantList = async (__, { page, per_page, sort, sort_order }, context) =>
               }
             : result;
     } catch (error) {
-        console.warn(error);
+        console.error(error);
+        throw new GraphQLError(`getWantList: ${error}`);
     }
-
-    return null;
 };
 
 const getRelease = async (__, { id }, context) => {
@@ -196,9 +198,9 @@ const getRelease = async (__, { id }, context) => {
 
         return { ...discogsRelease, vinylRatingsRelease: null };
     } catch (error) {
-        console.log('🚀 ~ file: resolvers.js ~ line 73 ~ getRelease ~ error', error);
+        console.error(error);
+        throw new GraphQLError(`getRelease: ${error}`);
     }
-    return null;
 };
 
 const addRelease = async (__, { releaseId, title, artist }, context) => {
