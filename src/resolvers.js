@@ -203,6 +203,26 @@ const getRelease = async (__, { id }, context) => {
     }
 };
 
+const getReleaseInCollection = async (__, { id }, context) => {
+    const { username, Authorization } = context;
+
+    try {
+        const response = await fetch(
+            `${DISCOGS_ENDPOINT}/users/${username}/collection/releases/${id}`,
+            {
+                headers: { Authorization },
+            }
+        );
+
+        const discogsRelease = await response.json();
+
+        return { isInCollection: !!discogsRelease?.releases?.length ?? false };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`getRelease: ${error}`);
+    }
+};
+
 const addToCollection = async (__, { releaseId, folderId }, context) => {
     const { username, Authorization } = context;
 
@@ -351,6 +371,7 @@ export const resolvers = {
         getCollection,
         getWantList,
         getRelease,
+        getReleaseInCollection,
         getSearch,
         getUser,
     },

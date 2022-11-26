@@ -59,6 +59,10 @@ type Identifier {
     description: String
 }
 
+type IsInCollectionResponse {
+    isInCollection: Boolean!
+}
+
 type Release {
     title: String!
     thumb: String!
@@ -67,7 +71,7 @@ type Release {
     formats: [Format]!
     year: StringOrInt
     vinylRatingsRelease: VRRelease
-    images: [Image]!
+    images: [Image]
     genres: [String]!
     styles: [String]
     tracklist: [TrackList]!
@@ -182,6 +186,7 @@ type Query {
         limit: Int
     ): Wants!
     getRelease(id: Int!): Release
+    getReleaseInCollection(id: Int!): IsInCollectionResponse
     getSearch(
         search: String
         type: String
