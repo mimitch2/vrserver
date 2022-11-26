@@ -203,6 +203,38 @@ const getRelease = async (__, { id }, context) => {
     }
 };
 
+const addToCollection = async (__, { releaseId, folderId }, context) => {
+    const { username, Authorization } = context;
+
+    const response = await fetch(
+        `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}`,
+        {
+            method: 'POST',
+            headers: { Authorization },
+        }
+    );
+
+    const result = await response.json();
+
+    // let userCopy = await UserCopy.findOne({ releaseId, user });
+    // let release = await Release.findOne({ releaseId });
+
+    // if (!release) {
+    //     release = await Release.create({ releaseId, title, artist });
+    // }
+
+    // if (!userCopy) {
+    //     userCopy = await UserCopy.create({
+    //         releaseId,
+    //         washedOn: '',
+    //         release,
+    //         user,
+    //     });
+    // }
+
+    return result;
+};
+
 const addRelease = async (__, { releaseId, title, artist }, context) => {
     const { username } = context;
 
@@ -326,6 +358,7 @@ export const resolvers = {
         addRelease,
         addRating,
         addWashedOn,
+        addToCollection,
     },
     StringOrInt: new GraphQLScalarType({
         name: 'StringOrInt',

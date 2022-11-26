@@ -158,6 +158,10 @@ type UserCopy {
     washedOn: String
 }
 
+type AddToCollectionResponse {
+    instance_id: String!
+}
+
 type Query {
     getFolders: [Folder]!
     getCollection(
@@ -193,6 +197,7 @@ type Query {
 
 type Mutation {
     addRelease(releaseId: Int!, title: String!, artist: String!): VRRelease!
+    addToCollection(releaseId: Int!, folderId: Int!): AddToCollectionResponse
     addRating(
         releaseId: Int!
         quietness: Int!
