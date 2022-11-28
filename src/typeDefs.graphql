@@ -44,7 +44,10 @@ type SearchUserData {
 type Releases {
     id: ID!
     date_added: String
+    instance_id: ID
+    folder_id: ID
     basic_information: BasicInformation!
+    rating: Int
 }
 
 type TrackList {
@@ -61,6 +64,8 @@ type Identifier {
 
 type IsInCollectionResponse {
     isInCollection: Boolean!
+    pagination: Pagination!
+    releases: [Releases]!
 }
 
 type Release {
@@ -166,6 +171,10 @@ type AddToCollectionResponse {
     instance_id: String!
 }
 
+type RemoveFromCollectionResponse {
+    isGood: Boolean
+}
+
 type Query {
     getFolders: [Folder]!
     getCollection(
@@ -203,6 +212,11 @@ type Query {
 type Mutation {
     addRelease(releaseId: Int!, title: String!, artist: String!): VRRelease!
     addToCollection(releaseId: Int!, folderId: Int!): AddToCollectionResponse
+    removeFromCollection(
+        folderId: Int!
+        releaseId: Int!
+        instanceId: Int!
+    ): RemoveFromCollectionResponse
     addRating(
         releaseId: Int!
         quietness: Int!

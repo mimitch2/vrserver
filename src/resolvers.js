@@ -83,6 +83,7 @@ const getSearch = async (
         });
 
         const result = await response.json();
+
         const formatted = result.results.map((release) => {
             const [artist, title] = release?.title?.split(' - ') ?? '';
 
@@ -214,9 +215,13 @@ const getReleaseInCollection = async (__, { id }, context) => {
             }
         );
 
-        const discogsRelease = await response.json();
+        const result = await response.json();
 
-        return { isInCollection: !!discogsRelease?.releases?.length ?? false };
+        return {
+            isInCollection: !!result?.releases?.length ?? false,
+            pagination: result.pagination,
+            releases: result.releases,
+        };
     } catch (error) {
         console.error(error);
         throw new GraphQLError(`getRelease: ${error}`);
@@ -236,23 +241,27 @@ const addToCollection = async (__, { releaseId, folderId }, context) => {
 
     const result = await response.json();
 
-    // let userCopy = await UserCopy.findOne({ releaseId, user });
-    // let release = await Release.findOne({ releaseId });
-
-    // if (!release) {
-    //     release = await Release.create({ releaseId, title, artist });
-    // }
-
-    // if (!userCopy) {
-    //     userCopy = await UserCopy.create({
-    //         releaseId,
-    //         washedOn: '',
-    //         release,
-    //         user,
-    //     });
-    // }
-
     return result;
+};
+
+const removeFromCollection = async (__, { folderId, releaseId, instanceId }, context) => {
+    const { username, Authorization } = context;
+
+    try {
+        const response = await fetch(
+            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}/instances/${instanceId}
+            `,
+            {
+                method: 'DELETE',
+                headers: { Authorization },
+            }
+        );
+
+        return { isGood: response.status === 204 };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`removeFromCollection: ${error}`);
+    }
 };
 
 const addRelease = async (__, { releaseId, title, artist }, context) => {
@@ -377,9 +386,10 @@ export const resolvers = {
     },
     Mutation: {
         addRelease,
+        addToCollection,
+        removeFromCollection,
         addRating,
         addWashedOn,
-        addToCollection,
     },
     StringOrInt: new GraphQLScalarType({
         name: 'StringOrInt',
