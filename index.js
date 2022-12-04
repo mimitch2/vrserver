@@ -57,7 +57,7 @@ const server = new ApolloServer({
             return { username, Authorization };
         }
 
-        throw new AuthenticationError('you must be logged in');
+        throw new AuthenticationError('You must be logged in');
     },
 });
 
