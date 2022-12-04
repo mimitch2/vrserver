@@ -75,6 +75,7 @@ const getSearch = async (
             limit,
         },
     });
+
     const { Authorization } = context;
 
     try {
@@ -84,19 +85,20 @@ const getSearch = async (
 
         const result = await response.json();
 
-        const formatted = result.results.map((release) => {
-            const [artist, title] = release?.title?.split(' - ') ?? '';
+        const formatted =
+            result?.results?.map((release) => {
+                const [artist, title] = release?.title?.split(' - ') ?? '';
 
-            return {
-                id: release.id,
-                basic_information: {
-                    ...release,
-                    artists: [{ name: artist || 'Unknown' }],
-                    title: title || 'Unknown',
-                    styles: release.style,
-                },
-            };
-        });
+                return {
+                    id: release.id,
+                    basic_information: {
+                        ...release,
+                        artists: [{ name: artist || 'Unknown' }],
+                        title: title || 'Unknown',
+                        styles: release.style,
+                    },
+                };
+            }) ?? [];
 
         return { pagination: result.pagination, results: formatted };
     } catch (error) {
