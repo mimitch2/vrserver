@@ -22,12 +22,6 @@ const getFolders = async (__, ___, context) => {
 
     const result = await response.json();
 
-    // const formattedResults = result.folders.map(({ name, id, count }) => ({
-    //     value: id,
-    //     label: name,
-    //     count,
-    // }));
-
     return result.folders || [];
 };
 
