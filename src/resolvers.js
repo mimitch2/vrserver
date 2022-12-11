@@ -37,18 +37,23 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
     });
     const { username, Authorization } = context;
 
-    const response = await fetch(
-        `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folder}/releases${queryParams}`,
-        {
-            headers: {
-                Authorization,
-            },
-        }
-    );
+    try {
+        const response = await fetch(
+            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folder}/releases${queryParams}`,
+            {
+                headers: {
+                    Authorization,
+                },
+            }
+        );
 
-    const result = await response.json();
+        const result = await response.json();
 
-    return result;
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`getSearch: ${error}`);
+    }
 };
 
 const getSearch = async (
@@ -227,17 +232,22 @@ const getReleaseInCollection = async (__, { id }, context) => {
 const addToCollection = async (__, { releaseId, folderId }, context) => {
     const { username, Authorization } = context;
 
-    const response = await fetch(
-        `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}`,
-        {
-            method: 'POST',
-            headers: { Authorization },
-        }
-    );
+    try {
+        const response = await fetch(
+            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}`,
+            {
+                method: 'POST',
+                headers: { Authorization },
+            }
+        );
 
-    const result = await response.json();
+        const result = await response.json();
 
-    return result;
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`getSearch: ${error}`);
+    }
 };
 
 const removeFromCollection = async (__, { folderId, releaseId, instanceId }, context) => {

@@ -68,6 +68,17 @@ type IsInCollectionResponse {
     releases: [Releases]!
 }
 
+type DiscogsRating {
+    count: Int!
+    average: Float!
+}
+
+type DiscogsCommunity {
+    have: Int!
+    want: Int!
+    rating: DiscogsRating!
+}
+
 type Release {
     title: String!
     thumb: String!
@@ -84,6 +95,7 @@ type Release {
     released: String
     notes: String
     country: String
+    community: DiscogsCommunity
 }
 
 type WantListReleases {
