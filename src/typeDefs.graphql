@@ -26,9 +26,12 @@ type BasicInformation {
     year: StringOrInt
     country: String
     formats: [Format]
+    format: String
+    label: String
+    released: String
     genres: [String]
     styles: [String]
-    user_data: SearchUserData
+    user_data: UserData
 }
 
 type SearchResult {
@@ -36,7 +39,7 @@ type SearchResult {
     results: [Releases]!
 }
 
-type SearchUserData {
+type UserData {
     in_collection: Boolean
     in_wantlist: Boolean
 }
@@ -98,6 +101,27 @@ type Release {
     notes: String
     country: String
     community: DiscogsCommunity
+}
+
+type DiscogsStats {
+    user: UserData!
+    community: UserData!
+}
+
+type DiscogsVersions {
+    id: ID!
+    stats: DiscogsStats
+    thumb: String
+    format: String
+    country: String
+    title: String
+    label: String
+    released: String
+}
+
+type DiscogsMasterVersions {
+    pagination: Pagination
+    versions: [Releases]
 }
 
 type WantListReleases {
@@ -208,8 +232,17 @@ type Query {
         offset: Int
         limit: Int
     ): Wants!
-    getRelease(id: Int!): Release
-    getReleaseInCollection(id: Int!): IsInCollectionResponse
+    getRelease(id: Int!): Release!
+    getMasterReleaseVersions(
+        master_id: ID
+        page: Int
+        per_page: Int
+        sort: String
+        sort_order: String
+        released: String
+        country: String
+    ): DiscogsMasterVersions!
+    getReleaseInCollection(id: Int!): IsInCollectionResponse!
     getSearch(
         search: String
         type: String

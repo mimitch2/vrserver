@@ -205,6 +205,56 @@ const getRelease = async (__, { id }, context) => {
     }
 };
 
+const getMasterReleaseVersions = async (
+    __,
+    { master_id, page, per_page, sort, sort_order, released, country },
+    context
+) => {
+    const queryParams = generateQueryParams({
+        params: {
+            format: 'Vinyl',
+            page,
+            per_page,
+            sort,
+            sort_order,
+            released,
+            country,
+        },
+    });
+    const { Authorization } = context;
+
+    try {
+        const response = await fetch(
+            `${DISCOGS_ENDPOINT}/masters/${master_id}/versions${queryParams}`,
+            {
+                headers: {
+                    Authorization,
+                },
+            }
+        );
+
+        const result = await response.json();
+
+        const formatted =
+            result?.versions?.map((version) => ({
+                id: version.id,
+                basic_information: {
+                    ...version,
+                    user_data: version.stats.user,
+                    styles: [],
+                    genres: [],
+                    formats: [],
+                    artists: [],
+                },
+            })) ?? [];
+
+        return { pagination: result.pagination, versions: formatted };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`getSearch: ${error}`);
+    }
+};
+
 const getReleaseInCollection = async (__, { id }, context) => {
     const { username, Authorization } = context;
 
@@ -403,6 +453,7 @@ export const resolvers = {
         getCollection,
         getWantList,
         getRelease,
+        getMasterReleaseVersions,
         getReleaseInCollection,
         getSearch,
         getUser,
