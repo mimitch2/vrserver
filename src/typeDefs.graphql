@@ -80,6 +80,8 @@ type DiscogsCommunity {
 }
 
 type Release {
+    id: ID!
+    master_id: ID!
     title: String!
     thumb: String!
     artists_sort: String

@@ -263,6 +263,23 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
             }
         );
 
+        const user = await User.findOne({ username });
+        const userCopy = await UserCopy.findOne({ releaseId, user });
+        const release = await Release.findOne({ releaseId });
+
+        if (!release) {
+            return { isGood: response.status === 204 };
+        }
+
+        if (userCopy) {
+            await UserCopy.deleteOne({
+                releaseId,
+                washedOn: '',
+                release,
+                user,
+            });
+        }
+
         return { isGood: response.status === 204 };
     } catch (error) {
         console.error(error);
