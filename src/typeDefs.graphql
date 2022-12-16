@@ -125,8 +125,7 @@ type DiscogsMasterVersions {
 }
 
 type WantListReleases {
-    id: ID
-    date_added: String
+    rating: Int
     basic_information: BasicInformation!
 }
 

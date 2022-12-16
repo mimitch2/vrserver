@@ -85,19 +85,24 @@ const getSearch = async (
         const result = await response.json();
 
         const formatted =
-            result?.results?.map((release) => {
-                const [artist, title] = release?.title?.split(' - ') ?? '';
+            (await Promise.all(
+                result?.results?.map(async (release) => {
+                    const VrRelease = await Release.findOne({ id: release.id });
 
-                return {
-                    id: release.id,
-                    basic_information: {
-                        ...release,
-                        artists: [{ name: artist || 'Unknown' }],
-                        title: title || 'Unknown',
-                        styles: release.style,
-                    },
-                };
-            }) ?? [];
+                    const [artist, title] = release?.title?.split(' - ') ?? '';
+
+                    return {
+                        id: release.id,
+                        rating: VrRelease?.ratingAvg ?? 0,
+                        basic_information: {
+                            ...release,
+                            artists: [{ name: artist || 'Unknown' }],
+                            title: title || 'Unknown',
+                            styles: release.style,
+                        },
+                    };
+                })
+            )) ?? [];
 
         return { pagination: result.pagination, results: formatted };
     } catch (error) {
