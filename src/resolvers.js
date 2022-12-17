@@ -49,7 +49,19 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
 
         const result = await response.json();
 
-        return result;
+        const formatted =
+            (await Promise.all(
+                result?.releases?.map(async (release) => {
+                    const VrRelease = await Release.findOne({ releaseId: release.id });
+
+                    return {
+                        ...release,
+                        rating: VrRelease?.ratingAvg ?? 0,
+                    };
+                })
+            )) ?? [];
+
+        return { pagination: result.pagination, releases: formatted };
     } catch (error) {
         console.error(error);
         throw new GraphQLError(`getSearch: ${error}`);
@@ -87,13 +99,13 @@ const getSearch = async (
         const formatted =
             (await Promise.all(
                 result?.results?.map(async (release) => {
-                    const VrRelease = await Release.findOne({ id: release.id });
+                    const vrRelease = await Release.findOne({ releaseId: release.id });
 
                     const [artist, title] = release?.title?.split(' - ') ?? '';
 
                     return {
                         id: release.id,
-                        rating: VrRelease?.ratingAvg ?? 0,
+                        rating: vrRelease?.ratingAvg ?? 0,
                         basic_information: {
                             ...release,
                             artists: [{ name: artist || 'Unknown' }],
@@ -140,14 +152,24 @@ const getWantList = async (__, { page, per_page, sort, sort_order }, context) =>
 
         const result = await response.json();
 
-        const { wants } = result;
+        const formatted =
+            (await Promise.all(
+                result?.wants?.map(async (release) => {
+                    const vrRelease = await Release.findOne({ releaseId: release.id });
+
+                    return {
+                        ...release,
+                        rating: vrRelease?.ratingAvg ?? 0,
+                    };
+                })
+            )) ?? [];
 
         return isCustomWantListSorted
             ? {
-                  wants: sortByGenreArtist({ arr: wants, sortOrder: sort_order }),
+                  wants: sortByGenreArtist({ arr: formatted, sortOrder: sort_order }),
                   pagination: result.pagination,
               }
-            : result;
+            : { pagination: result.pagination, wants: formatted };
     } catch (error) {
         console.error(error);
         throw new GraphQLError(`getWantList: ${error}`);
@@ -241,17 +263,24 @@ const getMasterReleaseVersions = async (
         const result = await response.json();
 
         const formatted =
-            result?.versions?.map((version) => ({
-                id: version.id,
-                basic_information: {
-                    ...version,
-                    user_data: version.stats.user,
-                    styles: [],
-                    genres: [],
-                    formats: [],
-                    artists: [],
-                },
-            })) ?? [];
+            (await Promise.all(
+                result?.versions?.map(async (version) => {
+                    const vrRelease = await Release.findOne({ releaseId: version.id });
+
+                    return {
+                        id: version.id,
+                        rating: vrRelease?.ratingAvg ?? 0,
+                        basic_information: {
+                            ...version,
+                            user_data: version.stats.user,
+                            styles: [],
+                            genres: [],
+                            formats: [],
+                            artists: [],
+                        },
+                    };
+                })
+            )) ?? [];
 
         return { pagination: result.pagination, versions: formatted };
     } catch (error) {

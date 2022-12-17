@@ -49,8 +49,8 @@ type Releases {
     date_added: String
     instance_id: ID
     folder_id: ID
-    basic_information: BasicInformation!
     rating: Int
+    basic_information: BasicInformation!
 }
 
 type TrackList {
@@ -126,6 +126,7 @@ type DiscogsMasterVersions {
 
 type WantListReleases {
     rating: Int
+    id: Int
     basic_information: BasicInformation!
 }
 
