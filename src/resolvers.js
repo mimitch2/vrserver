@@ -402,24 +402,37 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
     try {
         const user = await User.findOne({ username });
         const release = await Release.findOne({ releaseId });
+        let rating = await Rating.findOne({ user, release });
+        const ratingExists = !!rating;
 
-        const rating = await Rating.create({
-            ...ratings,
-            rating: ((clarity + quietness + flatness) / 3).toFixed(1),
-            notes,
-            release,
-            user,
-        });
+        if (ratingExists) {
+            Object.entries(ratings).forEach(([key, value]) => {
+                rating[key] = value;
+            });
+            rating.notes = notes;
+            rating.rating = ((clarity + quietness + flatness) / 3).toFixed(1);
+
+            await rating.save();
+        } else {
+            rating = await Rating.create({
+                ...ratings,
+                rating: ((clarity + quietness + flatness) / 3).toFixed(1),
+                notes,
+                release,
+                user,
+            });
+
+            user.releasesRated += 1;
+
+            await user.save();
+        }
 
         await updateRelease({
             ratings,
             notes,
             release,
+            isUpdating: ratingExists,
         });
-
-        user.releasesRated += 1;
-
-        await user.save();
 
         return rating;
     } catch (error) {

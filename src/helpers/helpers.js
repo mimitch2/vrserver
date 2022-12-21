@@ -36,7 +36,7 @@ export const getDiscogsHeadersAndUsername = ({ auth }) => {
     };
 };
 
-export const updateRelease = async ({ ratings = null, release, releaseData }) => {
+export const updateRelease = async ({ ratings = null, release, releaseData, isUpdating }) => {
     if (!ratings) {
         _.forEach(releaseData, (value, key) => {
             release[key] = value;
@@ -69,7 +69,7 @@ export const updateRelease = async ({ ratings = null, release, releaseData }) =>
     const ratingTypeCount = Object.keys(ratings).length;
     const newRatingsTotal = _.reduce(ratings, (sum, value) => sum + value, 0);
     const newRatingsAvg = +(newRatingsTotal / ratingTypeCount).toFixed(1);
-    const newRatingsCount = +(release.ratingsCount += 1);
+    const newRatingsCount = isUpdating ? +release.ratingsCount : +(release.ratingsCount += 1);
     const hasBeenRated = newRatingsCount > 1;
 
     release.ratingAvg = hasBeenRated
@@ -81,6 +81,7 @@ export const updateRelease = async ({ ratings = null, release, releaseData }) =>
         if (key === 'total') {
             return false;
         }
+
         const averageKey = `${key}Avg`;
         const average = (hasBeenRated ? value / newRatingsCount : value).toFixed(1);
 
