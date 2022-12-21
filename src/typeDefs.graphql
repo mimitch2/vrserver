@@ -153,6 +153,7 @@ input Ratings {
 }
 
 type VRRating {
+    _id: ID!
     quietness: Float!
     flatness: Float!
     clarity: Float!
