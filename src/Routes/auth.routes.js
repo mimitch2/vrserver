@@ -76,9 +76,9 @@ router.get('/return', async (req, res, next) => {
                 Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`,
             },
         });
+
         const identity = await identityResponse.json();
         const { username } = identity;
-        const discogsUserId = identity.id;
 
         const userResponse = await fetch(`https://api.discogs.com/users/${username}`, {
             headers: {
@@ -89,7 +89,14 @@ router.get('/return', async (req, res, next) => {
 
         const userData = await userResponse.json();
 
-        if (discogsAccessToken && discogsAccessTokenSecret) {
+        if (discogsAccessToken && discogsAccessTokenSecret && userData) {
+            const {
+                id: discogsUserId,
+                name,
+                email,
+                uri: discogsUserInfoUri,
+                releases_rated: discogsReleasesRated,
+            } = userData;
             const token = jwt.sign(discogsAccessToken, JWT_SECRET);
             const secret = jwt.sign(discogsAccessTokenSecret, JWT_SECRET);
             const signedUsername = jwt.sign(identity.username, JWT_SECRET);
@@ -99,6 +106,10 @@ router.get('/return', async (req, res, next) => {
                 try {
                     await User.create({
                         username,
+                        email,
+                        name,
+                        discogsUserInfoUri,
+                        discogsReleasesRated,
                         token,
                         discogsUserId,
                         releasesRated: 0,

@@ -244,8 +244,8 @@ const getMasterReleaseVersions = async (
             per_page,
             sort,
             sort_order,
-            released,
-            country,
+            // released,
+            // country,
         },
     });
     const { Authorization } = context;
