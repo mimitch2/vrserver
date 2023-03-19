@@ -73,18 +73,23 @@ const getSearch = async (
     { search, type = 'release', sort, sort_order, page, per_page, offset, limit },
     context
 ) => {
+    const params = {
+        type,
+        sort,
+        sort_order,
+        q: search,
+        page,
+        per_page,
+        offset,
+        limit,
+    };
+
+    if (type === 'release') {
+        params.format = 'vinyl';
+    }
+
     const queryParams = generateQueryParams({
-        params: {
-            format: 'vinyl',
-            type,
-            sort,
-            sort_order,
-            q: search,
-            page,
-            per_page,
-            offset,
-            limit,
-        },
+        params,
     });
 
     const { Authorization } = context;

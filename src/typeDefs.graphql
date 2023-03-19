@@ -32,6 +32,7 @@ type BasicInformation {
     genres: [String]
     styles: [String]
     user_data: UserData
+    type: String!
 }
 
 type SearchResult {

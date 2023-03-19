@@ -11,7 +11,7 @@ export const generateQueryParams = ({ params }) =>
             let encodedKeyValue = '';
             const dividerSymbol = result ? '&' : '?';
 
-            if (_.isArray(val)) {
+            if (Array.isArray(val)) {
                 const arrayString = `[${val.join(',').replace(',', '||')}]`;
 
                 encodedKeyValue = `${encodeURIComponent(key)}=${arrayString}`;

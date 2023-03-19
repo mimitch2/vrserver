@@ -35,7 +35,7 @@ router.get('/auth', async (req, res, next) => {
             : `http://${req.hostname}:${process.env.PORT || 8080}`;
 
     try {
-        const tokenResponse = await fetch('https://api.discogs.com/oauth/request_token', {
+        const tokenResponse = await fetch(`${process.env.DISCOGS_ENDPOINT}/oauth/request_token`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -131,7 +131,12 @@ router.get('/return', async (req, res, next) => {
                 secret,
             });
 
-            res.redirect(`vinylratings://home?auth=${cookie}`);
+            const appUri =
+                process.env.NODE_ENV === 'development'
+                    ? 'exp://192.168.4.89:19000/--'
+                    : 'vinylratings://';
+            // const appUri = 'vinylratings://';
+            res.redirect(`${appUri}/home?auth=${cookie}`);
         }
     } catch (error) {
         next(res.status(500).send('Internal Server Error'));
