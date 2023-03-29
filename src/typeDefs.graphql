@@ -26,8 +26,8 @@ type BasicInformation {
     year: StringOrInt
     country: String
     formats: [Format]
-    format: String
-    label: String
+    format: [String]
+    label: [String]
     released: String
     genres: [String]
     styles: [String]
@@ -35,14 +35,13 @@ type BasicInformation {
     type: String!
 }
 
-type SearchResult {
-    pagination: Pagination!
-    results: [Releases]!
-}
-
-type UserData {
-    in_collection: Boolean
-    in_wantlist: Boolean
+type ArtistSearch {
+    id: ID!
+    type: String!
+    user_data: UserData!
+    title: String!
+    thumb: String
+    cover_image: String
 }
 
 type Releases {
@@ -52,6 +51,25 @@ type Releases {
     folder_id: ID
     rating: Float
     basic_information: BasicInformation!
+}
+
+type ReleasesSearchResult {
+    isReleases: Boolean
+    pagination: Pagination!
+    results: [Releases]!
+}
+
+type ArtistSearchResult {
+    isArtists: Boolean
+    pagination: Pagination!
+    results: [ArtistSearch]!
+}
+
+union SearchResults = ArtistSearchResult | ReleasesSearchResult
+
+type UserData {
+    in_collection: Boolean
+    in_wantlist: Boolean
 }
 
 type TrackList {
@@ -255,7 +273,7 @@ type Query {
         per_page: Int
         offset: Int
         limit: Int
-    ): SearchResult!
+    ): SearchResults
     getUser(auth: String!): User!
 }
 

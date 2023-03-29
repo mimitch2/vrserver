@@ -1,3 +1,5 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
@@ -70,28 +72,26 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
 
 const getSearch = async (
     __,
-    { search, type = 'release', sort, sort_order, page, per_page, offset, limit },
+    { search, type, sort, sort_order, page, per_page, offset, limit },
     context
 ) => {
     const params = {
         type,
         sort,
         sort_order,
-        q: search,
         page,
         per_page,
         offset,
         limit,
+        q: search,
     };
 
     if (type === 'release') {
         params.format = 'vinyl';
     }
-
     const queryParams = generateQueryParams({
         params,
     });
-
     const { Authorization } = context;
 
     try {
@@ -101,8 +101,10 @@ const getSearch = async (
 
         const result = await response.json();
 
-        const formatted =
-            (await Promise.all(
+        let formatted = [];
+
+        if (type === 'release') {
+            formatted = await Promise.all(
                 result?.results?.map(async (release) => {
                     const vrRelease = await Release.findOne({ releaseId: release.id });
 
@@ -119,9 +121,14 @@ const getSearch = async (
                         },
                     };
                 })
-            )) ?? [];
+            );
+        } else if (type === 'artist') {
+            formatted = await result.results;
+        }
 
-        return { pagination: result.pagination, results: formatted };
+        const typeKey = type === 'artist' ? 'isArtists' : 'isReleases';
+
+        return { [typeKey]: true, pagination: result.pagination, results: formatted };
     } catch (error) {
         console.error(error);
         throw new GraphQLError(`getSearch: ${error}`);
@@ -500,6 +507,17 @@ const getUser = async (__, { auth }) => {
 };
 
 export const resolvers = {
+    SearchResults: {
+        __resolveType(obj, contextValue, info) {
+            if (obj.isReleases) {
+                return 'ReleasesSearchResult';
+            }
+            if (obj.isArtists) {
+                return 'ArtistSearchResult';
+            }
+            return null; // GraphQLError is thrown
+        },
+    },
     Query: {
         getFolders,
         getCollection,
