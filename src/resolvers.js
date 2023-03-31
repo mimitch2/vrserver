@@ -108,7 +108,7 @@ const getSearch = async (
                 result?.results?.map(async (release) => {
                     const vrRelease = await Release.findOne({ releaseId: release.id });
 
-                    const [artist, title] = release?.title?.split(' - ') ?? '';
+                    const [artist, title] = release?.title?.split?.(' - ') ?? '';
 
                     return {
                         id: release.id,
@@ -325,6 +325,24 @@ const getReleaseInCollection = async (__, { id }, context) => {
     }
 };
 
+const getArtist = async (__, { id }, context) => {
+    const { Authorization } = context;
+
+    try {
+        const response = await fetch(`${DISCOGS_ENDPOINT}/artists/${id}`, {
+            headers: { Authorization },
+        });
+
+        const result = await response.json();
+        console.log('🚀 ~ file: resolvers.js:337 ~ getArtist ~ result:', result);
+
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`getRelease: ${error}`);
+    }
+};
+
 const addToCollection = async (__, { releaseId, folderId }, context) => {
     const { username, Authorization } = context;
 
@@ -527,6 +545,7 @@ export const resolvers = {
         getReleaseInCollection,
         getSearch,
         getUser,
+        getArtist,
     },
     Mutation: {
         addRelease,

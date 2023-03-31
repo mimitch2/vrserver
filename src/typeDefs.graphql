@@ -9,6 +9,21 @@ type Artist {
     name: String
 }
 
+type ArtistMember {
+    id: ID!
+    name: String!
+    active: Boolean
+    thumbnail_url: String
+}
+
+type ArtistPage {
+    namevariations: [String]
+    profile: String
+    images: [Image]
+    name: String!
+    members: [ArtistMember]
+}
+
 scalar StringOrInt
 
 type Format {
@@ -275,6 +290,7 @@ type Query {
         limit: Int
     ): SearchResults
     getUser(auth: String!): User!
+    getArtist(id: Int!): ArtistPage!
 }
 
 type Mutation {
