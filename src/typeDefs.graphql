@@ -47,7 +47,7 @@ type BasicInformation {
     genres: [String]
     styles: [String]
     user_data: UserData
-    type: String!
+    type: String
 }
 
 type ArtistSearch {
@@ -80,7 +80,13 @@ type ArtistSearchResult {
     results: [ArtistSearch]!
 }
 
-union SearchResults = ArtistSearchResult | ReleasesSearchResult
+type MasterSearchResult {
+    isMasters: Boolean
+    pagination: Pagination!
+    results: [Releases]!
+}
+
+union SearchResults = ArtistSearchResult | ReleasesSearchResult | MasterSearchResult
 
 type UserData {
     in_collection: Boolean

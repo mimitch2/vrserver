@@ -57,8 +57,12 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
                     const VrRelease = await Release.findOne({ releaseId: release.id });
 
                     return {
-                        ...release,
                         rating: VrRelease?.ratingAvg ?? 0,
+                        ...release,
+                        basic_information: {
+                            ...release.basic_information,
+                            type: 'release',
+                        },
                     };
                 })
             )) ?? [];
@@ -103,7 +107,7 @@ const getSearch = async (
 
         let formatted = [];
 
-        if (type === 'release') {
+        if (type === 'release' || type === 'master') {
             formatted = await Promise.all(
                 result?.results?.map(async (release) => {
                     const vrRelease = await Release.findOne({ releaseId: release.id });
@@ -126,7 +130,24 @@ const getSearch = async (
             formatted = await result.results;
         }
 
-        const typeKey = type === 'artist' ? 'isArtists' : 'isReleases';
+        let typeKey;
+
+        switch (type) {
+            case 'release':
+                typeKey = 'isReleases';
+                break;
+            case 'artist':
+                typeKey = 'isArtists';
+                break;
+            case 'master':
+                typeKey = 'isMasters';
+                break;
+            case 'label':
+                typeKey = 'isLabels';
+                break;
+            default:
+                typeKey = 'isReleases';
+        }
 
         return { [typeKey]: true, pagination: result.pagination, results: formatted };
     } catch (error) {
@@ -285,6 +306,8 @@ const getMasterReleaseVersions = async (
                         basic_information: {
                             ...version,
                             user_data: version.stats.user,
+                            label: version.label.split(', ') ?? [],
+                            format: version.format.split(', ') ?? [],
                             styles: [],
                             genres: [],
                             formats: [],
@@ -334,7 +357,6 @@ const getArtist = async (__, { id }, context) => {
         });
 
         const result = await response.json();
-        console.log('🚀 ~ file: resolvers.js:337 ~ getArtist ~ result:', result);
 
         return result;
     } catch (error) {
@@ -532,6 +554,12 @@ export const resolvers = {
             }
             if (obj.isArtists) {
                 return 'ArtistSearchResult';
+            }
+            if (obj.isLabels) {
+                return 'LabelSearchResult';
+            }
+            if (obj.isMasters) {
+                return 'MasterSearchResult';
             }
             return null; // GraphQLError is thrown
         },
