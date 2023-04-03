@@ -265,6 +265,23 @@ const getRelease = async (__, { id }, context) => {
     }
 };
 
+const getMasterRelease = async (__, { id }, context) => {
+    const { Authorization } = context;
+
+    try {
+        const response = await fetch(`${DISCOGS_ENDPOINT}/masters/${id}`, {
+            headers: { Authorization },
+        });
+
+        const result = await response.json();
+
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`getMasterRelease: ${error}`);
+    }
+};
+
 const getMasterReleaseVersions = async (
     __,
     { master_id, page, per_page, sort, sort_order, released, country },
@@ -569,6 +586,7 @@ export const resolvers = {
         getCollection,
         getWantList,
         getRelease,
+        getMasterRelease,
         getMasterReleaseVersions,
         getReleaseInCollection,
         getSearch,

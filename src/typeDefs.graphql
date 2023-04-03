@@ -144,6 +144,22 @@ type Release {
     community: DiscogsCommunity
 }
 
+type MasterRelease {
+    id: ID!
+    title: String!
+    artists: [Artist]!
+    year: StringOrInt
+    images: [Image]
+    genres: [String]!
+    styles: [String]
+    tracklist: [TrackList]!
+    released: String
+    num_for_sale: Int
+    lowest_price: Float
+    main_release: Int
+    most_recent_release: Int
+}
+
 type DiscogsStats {
     user: UserData!
     community: UserData!
@@ -275,6 +291,7 @@ type Query {
         limit: Int
     ): Wants!
     getRelease(id: Int!): Release!
+    getMasterRelease(id: Int!): MasterRelease!
     getMasterReleaseVersions(
         master_id: ID
         page: Int
