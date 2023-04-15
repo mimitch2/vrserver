@@ -9,6 +9,20 @@ type Artist {
     name: String
 }
 
+type Label {
+    name: String
+}
+
+type Company {
+    name: String
+    entity_type_name: String
+}
+
+type SeriesEntry {
+    name: String
+    entity_type_name: String
+}
+
 type ArtistMember {
     id: ID!
     name: String!
@@ -142,6 +156,9 @@ type Release {
     notes: String
     country: String
     community: DiscogsCommunity
+    labels: [Label]!
+    series: [SeriesEntry]!
+    companies: [Company]!
 }
 
 type MasterRelease {
