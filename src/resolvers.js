@@ -57,8 +57,8 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
                     const VrRelease = await Release.findOne({ releaseId: release.id });
 
                     return {
-                        rating: VrRelease?.ratingAvg ?? 0,
                         ...release,
+                        rating: VrRelease?.ratingAvg ?? 0,
                         basic_information: {
                             ...release.basic_information,
                             type: 'release',
