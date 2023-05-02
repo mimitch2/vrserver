@@ -73,12 +73,18 @@ type ArtistSearch {
     cover_image: String
 }
 
+type InstanceNotes {
+    field_id: Int
+    value: String
+}
+
 type Releases {
     id: ID!
     date_added: String
     instance_id: ID
     folder_id: ID
     rating: Float
+    notes: [InstanceNotes]
     basic_information: BasicInformation!
 }
 
