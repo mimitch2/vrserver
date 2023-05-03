@@ -2,9 +2,18 @@ import mongoose from 'mongoose';
 
 const { Schema, model } = mongoose;
 
+// const NotesSchema = new Schema({
+//     field_id: Number,
+//     value: String,
+// });
+
 const userCopySchema = new Schema(
     {
         releaseId: {
+            type: Number,
+            required: true,
+        },
+        instanceId: {
             type: Number,
             required: true,
         },
@@ -22,6 +31,10 @@ const userCopySchema = new Schema(
             ref: 'Release',
             required: true,
         },
+        // notes: {
+        //     type: [NotesSchema],
+        //     default: null,
+        // },
     },
     { timestamps: true }
 );

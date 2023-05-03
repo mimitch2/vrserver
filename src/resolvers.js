@@ -440,31 +440,41 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
     }
 };
 
-const addRelease = async (__, { releaseId, title, artist }, context) => {
+const addRelease = async (__, { releaseId, instanceId, title, artist, notes }, context) => {
     const { username } = context;
 
-    const user = await User.findOne({ username });
+    try {
+        const user = await User.findOne({ username });
 
-    let userCopy = await UserCopy.findOne({ releaseId, user });
-    let release = await Release.findOne({ releaseId });
+        let userCopy = await UserCopy.findOne({ instanceId, user });
+        let release = await Release.findOne({ releaseId });
 
-    if (!release) {
-        release = await Release.create({ releaseId, title, artist });
+        if (!release) {
+            release = await Release.create({ releaseId, title, artist });
+        }
+
+        if (!userCopy) {
+            userCopy = await UserCopy.create({
+                releaseId,
+                // instanceId,
+                washedOn: '',
+                release,
+                user,
+                // notes,
+            });
+        }
+
+        return release;
+    } catch (error) {
+        console.log('🚀 ~ file: resolvers.js:469 ~ addRelease ~ error:', error);
     }
-
-    if (!userCopy) {
-        userCopy = await UserCopy.create({
-            releaseId,
-            washedOn: '',
-            release,
-            user,
-        });
-    }
-
-    return release;
 };
 
-const addRating = async (__, { releaseId, clarity, quietness, flatness, notes }, context) => {
+const addRating = async (
+    __,
+    { input: { releaseId, clarity, quietness, flatness, notes } },
+    context
+) => {
     const ratings = { clarity, quietness, flatness };
     const { username } = context;
 

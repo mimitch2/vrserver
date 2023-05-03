@@ -100,6 +100,12 @@ type Collection {
     releases: [CollectionInstance]!
 }
 
+type IsInCollectionResponse {
+    isInCollection: Boolean!
+    pagination: Pagination!
+    releases: [CollectionInstance]!
+}
+
 type ReleasesSearchResult {
     isReleases: Boolean
     pagination: Pagination!
@@ -135,12 +141,6 @@ type Identifier {
     type: String!
     value: String!
     description: String
-}
-
-type IsInCollectionResponse {
-    isInCollection: Boolean!
-    pagination: Pagination!
-    releases: [CollectionInstance]!
 }
 
 type DiscogsRating {
@@ -253,9 +253,11 @@ type VRRating {
 }
 
 type UserCopy {
+    instanceId: Int
     releaseId: Int
     washedOn: String
     username: String
+    notes: [InstanceNotes]
 }
 
 type VRRelease {
@@ -286,11 +288,6 @@ type Folder {
     id: Int!
     name: String!
     count: Int!
-}
-
-type UserCopy {
-    releaseId: Int
-    washedOn: String
 }
 
 type AddToCollectionResponse {
@@ -346,8 +343,18 @@ type Query {
     getArtist(id: Int!): ArtistPage!
 }
 
+# input NotesInput {
+#     field_id: Int
+#     value: String
+# }
+
 type Mutation {
-    addRelease(releaseId: Int!, title: String!, artist: String!): VRRelease!
+    addRelease(
+        releaseId: Int!
+        # instanceId: Int!
+        title: String!
+        artist: String! # notes: [NotesInput]
+    ): VRRelease!
     addToCollection(releaseId: Int!, folderId: Int!): AddToCollectionResponse
     removeFromCollection(
         folderId: Int!
