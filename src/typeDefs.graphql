@@ -81,11 +81,23 @@ type InstanceNotes {
 type Releases {
     id: ID!
     date_added: String
-    instance_id: ID
+    rating: Float
+    basic_information: BasicInformation!
+}
+
+type CollectionInstance {
+    id: ID!
+    date_added: String
+    instance_id: ID!
     folder_id: ID
     rating: Float
     notes: [InstanceNotes]
     basic_information: BasicInformation!
+}
+
+type Collection {
+    pagination: Pagination!
+    releases: [CollectionInstance]!
 }
 
 type ReleasesSearchResult {
@@ -214,11 +226,6 @@ type Image {
     resource_url: String!
     height: Int
     width: Int
-}
-
-type Collection {
-    pagination: Pagination!
-    releases: [Releases]!
 }
 
 type Wants {

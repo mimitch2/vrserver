@@ -353,6 +353,7 @@ const getReleaseInCollection = async (__, { id }, context) => {
         );
 
         const result = await response.json();
+        console.log('🚀 ~ file: resolvers.js:356 ~ getReleaseInCollection ~ result:', result);
 
         return {
             isInCollection: !!result?.releases?.length ?? false,
