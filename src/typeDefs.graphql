@@ -140,7 +140,7 @@ type Identifier {
 type IsInCollectionResponse {
     isInCollection: Boolean!
     pagination: Pagination!
-    releases: [Releases]!
+    releases: [CollectionInstance]!
 }
 
 type DiscogsRating {
