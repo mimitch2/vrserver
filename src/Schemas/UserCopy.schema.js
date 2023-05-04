@@ -8,6 +8,10 @@ const userCopySchema = new Schema(
             type: Number,
             required: true,
         },
+        instanceId: {
+            type: Number,
+            required: true,
+        },
         washedOn: {
             type: String,
             default: '',

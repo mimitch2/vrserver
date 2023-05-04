@@ -440,7 +440,7 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
     }
 };
 
-const addRelease = async (__, { releaseId, title, artist }, context) => {
+const addRelease = async (__, { releaseId, instanceId, title, artist }, context) => {
     const { username } = context;
 
     const user = await User.findOne({ username });
@@ -454,6 +454,7 @@ const addRelease = async (__, { releaseId, title, artist }, context) => {
 
     if (!userCopy) {
         userCopy = await UserCopy.create({
+            instanceId,
             releaseId,
             washedOn: '',
             release,

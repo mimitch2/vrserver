@@ -8,41 +8,41 @@ const releaseSchema = new Schema(
     {
         releaseId: {
             type: Number,
-            required: true
+            required: true,
         },
         artist: {
             type: String,
-            required: true
+            required: true,
         },
         title: {
             type: String,
-            required: true
+            required: true,
         },
         ratingsCount: {
             type: Number,
             required: true,
-            default: 0
+            default: 0,
         },
         ratingAvg: {
             type: FloatType,
             required: true,
-            default: 0
+            default: 0,
         },
         quietnessAvg: {
             type: FloatType,
             required: true,
-            default: 0
+            default: 0,
         },
         flatnessAvg: {
             type: FloatType,
             required: true,
-            default: 0
+            default: 0,
         },
         clarityAvg: {
             type: FloatType,
             required: true,
-            default: 0
-        }
+            default: 0,
+        },
     },
     { timestamps: true }
 );
@@ -50,19 +50,19 @@ const releaseSchema = new Schema(
 releaseSchema.virtual('vinylRatings', {
     ref: 'Rating',
     localField: '_id',
-    foreignField: 'release'
+    foreignField: 'release',
 });
 
 releaseSchema.virtual('currentUserRating', {
     ref: 'Rating',
     localField: '_id',
-    foreignField: 'release'
+    foreignField: 'release',
 });
 
 releaseSchema.virtual('userCopy', {
     ref: 'UserCopy',
     localField: '_id',
-    foreignField: 'release'
+    foreignField: 'release',
 });
 
 releaseSchema.set('toObject', { virtuals: true });
