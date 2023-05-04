@@ -209,7 +209,7 @@ const getWantList = async (__, { page, per_page, sort, sort_order }, context) =>
     }
 };
 
-const getRelease = async (__, { id }, context) => {
+const getRelease = async (__, { id, instanceId }, context) => {
     const { username, Authorization } = context;
 
     try {
@@ -228,7 +228,7 @@ const getRelease = async (__, { id }, context) => {
 
         if (release) {
             const user = await User.findOne({ username });
-            const userCopy = await UserCopy.findOne({ releaseId: id, user });
+            const userCopy = await UserCopy.findOne({ instanceId, user });
             const userRating = await Rating.findOne({ user });
 
             const {
@@ -417,7 +417,7 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
         );
 
         const user = await User.findOne({ username });
-        const userCopy = await UserCopy.findOne({ releaseId, user });
+        const userCopy = await UserCopy.findOne({ instanceId, user });
         const release = await Release.findOne({ releaseId });
 
         if (!release) {
@@ -426,6 +426,7 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
 
         if (userCopy) {
             await UserCopy.deleteOne({
+                instanceId,
                 releaseId,
                 washedOn: '',
                 release,
@@ -445,7 +446,7 @@ const addRelease = async (__, { releaseId, instanceId, title, artist }, context)
 
     const user = await User.findOne({ username });
 
-    let userCopy = await UserCopy.findOne({ releaseId, user });
+    let userCopy = await UserCopy.findOne({ instanceId, user });
     let release = await Release.findOne({ releaseId });
 
     if (!release) {
@@ -513,7 +514,7 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
     return null;
 };
 
-const addWashedOn = async (__, { releaseId, washedOn, title, artist }, context) => {
+const addWashedOn = async (__, { releaseId, instanceId, washedOn, title, artist }, context) => {
     const { username } = context;
 
     try {
@@ -529,6 +530,7 @@ const addWashedOn = async (__, { releaseId, washedOn, title, artist }, context) 
 
             userCopy = await UserCopy.create({
                 releaseId,
+                instanceId,
                 washedOn: '',
                 release,
                 user,

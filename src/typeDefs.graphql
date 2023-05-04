@@ -317,7 +317,7 @@ type Query {
         offset: Int
         limit: Int
     ): Wants!
-    getRelease(id: Int!): Release!
+    getRelease(id: Int!, instanceId: Int): Release!
     getMasterRelease(id: Int!): MasterRelease!
     getMasterReleaseVersions(
         master_id: ID
@@ -368,5 +368,11 @@ type Mutation {
         flatness: Int!
         notes: String
     ): VRRating
-    addWashedOn(releaseId: Int!, washedOn: String!, title: String!, artist: String!): UserCopy
+    addWashedOn(
+        releaseId: Int!
+        instanceId: Int!
+        washedOn: String!
+        title: String!
+        artist: String!
+    ): UserCopy
 }
