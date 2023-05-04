@@ -351,7 +351,7 @@ type Query {
 type Mutation {
     addRelease(
         releaseId: Int!
-        # instanceId: Int!
+        instanceId: Int!
         title: String!
         artist: String! # notes: [NotesInput]
     ): VRRelease!

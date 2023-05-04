@@ -446,7 +446,7 @@ const addRelease = async (__, { releaseId, instanceId, title, artist, notes }, c
     try {
         const user = await User.findOne({ username });
 
-        let userCopy = await UserCopy.findOne({ instanceId, user });
+        let userCopy = await UserCopy.findOne({ releaseId, user });
         let release = await Release.findOne({ releaseId });
 
         if (!release) {
@@ -456,7 +456,7 @@ const addRelease = async (__, { releaseId, instanceId, title, artist, notes }, c
         if (!userCopy) {
             userCopy = await UserCopy.create({
                 releaseId,
-                // instanceId,
+                instanceId,
                 washedOn: '',
                 release,
                 user,
