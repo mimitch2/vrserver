@@ -1,9 +1,12 @@
-import { ApolloServer } from 'apollo-server-express';
-import { ApolloServerPluginDrainHttpServer, AuthenticationError } from 'apollo-server-core';
+import { ApolloServer } from '@apollo/server';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { readFileSync } from 'fs';
 import express from 'express';
 import http from 'http';
+import cors from 'cors';
 import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+import { expressMiddleware } from '@apollo/server/express4';
 import { getDiscogsHeadersAndUsername } from './src/helpers/helpers.js';
 
 import authRouter from './src/Routes/auth.routes.js';
@@ -30,7 +33,7 @@ const typeDefs = readFileSync('./src/typeDefs.graphql', 'UTF-8');
 const app = express();
 
 // app.use(bodyparser);
-app.use(authRouter);
+// app.use(authRouter);
 // app.use((req, res, next) => {
 //     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
 //     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -57,13 +60,13 @@ const server = new ApolloServer({
             return { username, Authorization };
         }
 
-        throw new AuthenticationError('You must be logged in');
+        throw new Error('You must be logged in');
     },
 });
 
 await server.start();
 
-server.applyMiddleware({ app });
+app.use(cors(), authRouter, bodyParser.json(), expressMiddleware(server));
 
 const PORT = process.env.PORT || 8080;
 
