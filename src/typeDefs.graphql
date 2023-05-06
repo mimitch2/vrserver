@@ -290,6 +290,19 @@ type Folder {
     count: Int!
 }
 
+type CustomField {
+    position: Int!
+    id: Int!
+    name: String!
+    type: String!
+    options: [String]
+    public: Boolean!
+    lines: Int
+}
+type CustomFieldsResponse {
+    fields: [CustomField]
+}
+
 type AddToCollectionResponse {
     instance_id: String!
 }
@@ -300,6 +313,7 @@ type RemoveFromCollectionResponse {
 
 type Query {
     getFolders: [Folder]!
+    getCustomFields: CustomFieldsResponse!
     getCollection(
         folder: Int
         page: Int

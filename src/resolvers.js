@@ -27,6 +27,25 @@ const getFolders = async (__, ___, context) => {
     return result.folders || [];
 };
 
+const getCustomFields = async (__, ___, context) => {
+    const { username, Authorization } = context;
+
+    try {
+        const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/collection/fields`, {
+            headers: {
+                Authorization,
+            },
+        });
+
+        const result = await response.json();
+
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`getSearch: ${error}`);
+    }
+};
+
 const getCollection = async (__, { folder, page, per_page, sort, sort_order }, context) => {
     const queryParams = generateQueryParams({
         params: {
@@ -586,6 +605,7 @@ export const resolvers = {
     },
     Query: {
         getFolders,
+        getCustomFields,
         getCollection,
         getWantList,
         getRelease,
