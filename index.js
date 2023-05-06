@@ -49,27 +49,36 @@ const server = new ApolloServer({
     csrfPrevention: true,
     cache: 'bounded',
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-    context: ({ req }) => {
-        const auth = req?.headers?.authorization ?? '';
-
-        if (auth) {
-            const json = auth.split(' ')[1];
-            const parsedAuth = JSON.parse(json);
-            const { username, Authorization } = getDiscogsHeadersAndUsername({ auth: parsedAuth });
-
-            return { username, Authorization };
-        }
-
-        throw new Error('You must be logged in');
-    },
 });
 
 await server.start();
 
-app.use(cors(), authRouter, bodyParser.json(), expressMiddleware(server));
+app.use(
+    '/graphql',
+    cors(),
+    authRouter,
+    bodyParser.json(),
+    expressMiddleware(server, {
+        context: ({ req }) => {
+            const auth = req?.headers?.authorization ?? '';
+
+            if (auth) {
+                const authJson = auth.split(' ')[1];
+                const parsedAuth = JSON.parse(authJson);
+                const { username, Authorization } = getDiscogsHeadersAndUsername({
+                    auth: parsedAuth,
+                });
+
+                return { username, Authorization };
+            }
+
+            throw new Error('You must be logged in');
+        },
+    })
+);
 
 const PORT = process.env.PORT || 8080;
 
 httpServer.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
+    console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
 });
