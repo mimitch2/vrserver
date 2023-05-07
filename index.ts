@@ -9,7 +9,6 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import { expressMiddleware } from '@apollo/server/express4';
 import { getDiscogsHeadersAndUsername } from './src/helpers/helpers.js';
-
 import authRouter from './src/Routes/auth.routes.js';
 import { resolvers } from './src/resolvers.js';
 

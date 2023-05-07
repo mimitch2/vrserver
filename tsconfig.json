@@ -7,6 +7,13 @@
         "module": "esnext",
         "moduleResolution": "node",
         "esModuleInterop": true,
-        "types": ["node"]
+        "types": ["node"],
+        "allowJs": true,
+        "skipLibCheck": true
+    },
+    "include": ["./index.ts", "./.env", "src"],
+    "exclude": ["./node_modules"],
+    "ts-node": {
+        "esm": true
     }
 }

@@ -6,8 +6,9 @@
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "NODE_ENV=development nodemon . -e graphql,js,json",
-        "start": "NODE_ENV=production node index.js",
+        "compile": "tsc",
+        "dev": "nodemon --exec node --loader ts-node/esm index.ts",
+        "start": "NODE_ENV=production yarn compile && node ./dist/index.js",
         "cm": "git cz",
         "heroku:logs": "heroku logs --tail",
         "heroku:deploy": "git push heroku main"
@@ -43,11 +44,14 @@
         "typescript": "^5.0.4"
     },
     "devDependencies": {
+        "@types/cors": "^2.8.13",
+        "@types/node": "^20.1.0",
         "cz-conventional-changelog": "^3.3.0",
         "eslint": "^7.32.0 || ^8.2.0",
         "eslint-config-airbnb-base": "^15.0.0",
         "eslint-config-prettier": "^8.5.0",
-        "eslint-plugin-import": "^2.25.2"
+        "eslint-plugin-import": "^2.25.2",
+        "ts-node": "^10.9.1"
     },
     "config": {
         "commitizen": {
