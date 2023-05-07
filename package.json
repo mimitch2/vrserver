@@ -9,7 +9,7 @@
         "compile": "tsc",
         "dev": "nodemon --exec node --loader ts-node/esm index.ts",
         "postinstall": "yarn compile",
-        "start": "NODE_ENV=production node ./dist/index.js",
+        "start": "NODE_ENV=production node dist/index.js",
         "cm": "git cz",
         "heroku:logs": "heroku logs --tail",
         "heroku:deploy": "git push heroku main"
