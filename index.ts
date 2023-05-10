@@ -31,9 +31,9 @@ mongoose.connection.once('open', () => console.log(`Connected to mongo at ${url}
 // @ts-ignore
 const typeDefs = readFileSync('./src/typeDefs.graphql', 'UTF-8');
 const app = express();
+app.use(authRouter);
 
 // app.use(bodyparser);
-// app.use(authRouter);
 // app.use((req, res, next) => {
 //     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
 //     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -57,7 +57,6 @@ await server.start();
 app.use(
     '/graphql',
     cors(),
-    authRouter,
     bodyParser.json(),
     expressMiddleware(server, {
         // @ts-ignore
