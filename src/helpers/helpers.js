@@ -2,7 +2,42 @@
 /* eslint-disable no-multi-assign */
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
+import { GraphQLError } from 'graphql';
+import fetch from 'node-fetch';
+
 import Rating from '../Schemas/Rating.schema.js';
+
+export const throwError = ({ error, discogsError }) => {
+    const errorString = `getCollection: ${error} ~ discogsError: ${discogsError}`;
+
+    console.error(errorString);
+
+    throw new GraphQLError(errorString);
+};
+
+export const fetchFromDiscogs = async ({ method = 'GET', url, context }) => {
+    const { Authorization } = context;
+    let discogsError = false;
+
+    try {
+        const response = await fetch(`${url}`, {
+            method,
+            headers: {
+                Authorization,
+            },
+        });
+
+        const result = await response.json();
+
+        if (result?.message) {
+            discogsError = result.message;
+        }
+
+        return result;
+    } catch (error) {
+        throwError({ error, discogsError });
+    }
+};
 
 export const generateQueryParams = ({ params }) =>
     _.reduce(
