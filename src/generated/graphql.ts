@@ -505,7 +505,8 @@ export type AdditionalEntityFields = {
   type?: InputMaybe<Scalars['String']>;
 };
 
-
+export type WithIndex<TObject> = TObject & Record<string, any>;
+export type ResolversObject<TObject> = WithIndex<TObject>;
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
@@ -573,17 +574,17 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 ) => TResult | Promise<TResult>;
 
 /** Mapping of union types */
-export type ResolversUnionTypes = {
+export type ResolversUnionTypes = ResolversObject<{
   SearchResults: ( ArtistSearchResult ) | ( MasterSearchResult ) | ( ReleasesSearchResult );
-};
+}>;
 
 /** Mapping of union parent types */
-export type ResolversUnionParentTypes = {
+export type ResolversUnionParentTypes = ResolversObject<{
   SearchResults: ( ArtistSearchResult ) | ( MasterSearchResult ) | ( ReleasesSearchResult );
-};
+}>;
 
 /** Mapping between all available schema types and the resolvers types */
-export type ResolversTypes = {
+export type ResolversTypes = ResolversObject<{
   AddToCollectionResponse: ResolverTypeWrapper<AddToCollectionResponse>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Artist: ResolverTypeWrapper<Artist>;
@@ -635,10 +636,10 @@ export type ResolversTypes = {
   WantListReleases: ResolverTypeWrapper<WantListReleases>;
   Wants: ResolverTypeWrapper<Wants>;
   AdditionalEntityFields: AdditionalEntityFields;
-};
+}>;
 
 /** Mapping between all available schema types and the resolvers parents */
-export type ResolversParentTypes = {
+export type ResolversParentTypes = ResolversObject<{
   AddToCollectionResponse: AddToCollectionResponse;
   String: Scalars['String'];
   Artist: Artist;
@@ -690,7 +691,7 @@ export type ResolversParentTypes = {
   WantListReleases: WantListReleases;
   Wants: Wants;
   AdditionalEntityFields: AdditionalEntityFields;
-};
+}>;
 
 export type UnionDirectiveArgs = {
   discriminatorField?: Maybe<Scalars['String']>;
@@ -739,34 +740,34 @@ export type MapDirectiveArgs = {
 
 export type MapDirectiveResolver<Result, Parent, ContextType = any, Args = MapDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
-export type AddToCollectionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['AddToCollectionResponse'] = ResolversParentTypes['AddToCollectionResponse']> = {
+export type AddToCollectionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['AddToCollectionResponse'] = ResolversParentTypes['AddToCollectionResponse']> = ResolversObject<{
   instance_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type ArtistResolvers<ContextType = any, ParentType extends ResolversParentTypes['Artist'] = ResolversParentTypes['Artist']> = {
+export type ArtistResolvers<ContextType = any, ParentType extends ResolversParentTypes['Artist'] = ResolversParentTypes['Artist']> = ResolversObject<{
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type ArtistMemberResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArtistMember'] = ResolversParentTypes['ArtistMember']> = {
+export type ArtistMemberResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArtistMember'] = ResolversParentTypes['ArtistMember']> = ResolversObject<{
   active?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   thumbnail_url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type ArtistPageResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArtistPage'] = ResolversParentTypes['ArtistPage']> = {
+export type ArtistPageResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArtistPage'] = ResolversParentTypes['ArtistPage']> = ResolversObject<{
   images?: Resolver<Maybe<Array<Maybe<ResolversTypes['Image']>>>, ParentType, ContextType>;
   members?: Resolver<Maybe<Array<Maybe<ResolversTypes['ArtistMember']>>>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namevariations?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type ArtistSearchResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArtistSearch'] = ResolversParentTypes['ArtistSearch']> = {
+export type ArtistSearchResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArtistSearch'] = ResolversParentTypes['ArtistSearch']> = ResolversObject<{
   cover_image?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   thumb?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -774,16 +775,16 @@ export type ArtistSearchResolvers<ContextType = any, ParentType extends Resolver
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user_data?: Resolver<ResolversTypes['UserData'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type ArtistSearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArtistSearchResult'] = ResolversParentTypes['ArtistSearchResult']> = {
+export type ArtistSearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArtistSearchResult'] = ResolversParentTypes['ArtistSearchResult']> = ResolversObject<{
   isArtists?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   pagination?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType>;
   results?: Resolver<Array<Maybe<ResolversTypes['ArtistSearch']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type BasicInformationResolvers<ContextType = any, ParentType extends ResolversParentTypes['BasicInformation'] = ResolversParentTypes['BasicInformation']> = {
+export type BasicInformationResolvers<ContextType = any, ParentType extends ResolversParentTypes['BasicInformation'] = ResolversParentTypes['BasicInformation']> = ResolversObject<{
   artists?: Resolver<Maybe<Array<Maybe<ResolversTypes['Artist']>>>, ParentType, ContextType>;
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   format?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
@@ -799,15 +800,15 @@ export type BasicInformationResolvers<ContextType = any, ParentType extends Reso
   user_data?: Resolver<Maybe<ResolversTypes['UserData']>, ParentType, ContextType>;
   year?: Resolver<Maybe<ResolversTypes['StringOrInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type CollectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Collection'] = ResolversParentTypes['Collection']> = {
+export type CollectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Collection'] = ResolversParentTypes['Collection']> = ResolversObject<{
   pagination?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType>;
   releases?: Resolver<Array<Maybe<ResolversTypes['CollectionInstance']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type CollectionInstanceResolvers<ContextType = any, ParentType extends ResolversParentTypes['CollectionInstance'] = ResolversParentTypes['CollectionInstance']> = {
+export type CollectionInstanceResolvers<ContextType = any, ParentType extends ResolversParentTypes['CollectionInstance'] = ResolversParentTypes['CollectionInstance']> = ResolversObject<{
   basic_information?: Resolver<ResolversTypes['BasicInformation'], ParentType, ContextType>;
   date_added?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   folder_id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
@@ -816,15 +817,15 @@ export type CollectionInstanceResolvers<ContextType = any, ParentType extends Re
   notes?: Resolver<Maybe<Array<Maybe<ResolversTypes['InstanceNotes']>>>, ParentType, ContextType>;
   rating?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type CompanyResolvers<ContextType = any, ParentType extends ResolversParentTypes['Company'] = ResolversParentTypes['Company']> = {
+export type CompanyResolvers<ContextType = any, ParentType extends ResolversParentTypes['Company'] = ResolversParentTypes['Company']> = ResolversObject<{
   entity_type_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type CustomFieldResolvers<ContextType = any, ParentType extends ResolversParentTypes['CustomField'] = ResolversParentTypes['CustomField']> = {
+export type CustomFieldResolvers<ContextType = any, ParentType extends ResolversParentTypes['CustomField'] = ResolversParentTypes['CustomField']> = ResolversObject<{
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   lines?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -833,39 +834,39 @@ export type CustomFieldResolvers<ContextType = any, ParentType extends Resolvers
   public?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type CustomFieldsResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['CustomFieldsResponse'] = ResolversParentTypes['CustomFieldsResponse']> = {
+export type CustomFieldsResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['CustomFieldsResponse'] = ResolversParentTypes['CustomFieldsResponse']> = ResolversObject<{
   fields?: Resolver<Maybe<Array<Maybe<ResolversTypes['CustomField']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type DiscogsCommunityResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsCommunity'] = ResolversParentTypes['DiscogsCommunity']> = {
+export type DiscogsCommunityResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsCommunity'] = ResolversParentTypes['DiscogsCommunity']> = ResolversObject<{
   have?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   rating?: Resolver<ResolversTypes['DiscogsRating'], ParentType, ContextType>;
   want?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type DiscogsMasterVersionsResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsMasterVersions'] = ResolversParentTypes['DiscogsMasterVersions']> = {
+export type DiscogsMasterVersionsResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsMasterVersions'] = ResolversParentTypes['DiscogsMasterVersions']> = ResolversObject<{
   pagination?: Resolver<Maybe<ResolversTypes['Pagination']>, ParentType, ContextType>;
   versions?: Resolver<Maybe<Array<Maybe<ResolversTypes['Releases']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type DiscogsRatingResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsRating'] = ResolversParentTypes['DiscogsRating']> = {
+export type DiscogsRatingResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsRating'] = ResolversParentTypes['DiscogsRating']> = ResolversObject<{
   average?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type DiscogsStatsResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsStats'] = ResolversParentTypes['DiscogsStats']> = {
+export type DiscogsStatsResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsStats'] = ResolversParentTypes['DiscogsStats']> = ResolversObject<{
   community?: Resolver<ResolversTypes['UserData'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['UserData'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type DiscogsVersionsResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsVersions'] = ResolversParentTypes['DiscogsVersions']> = {
+export type DiscogsVersionsResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscogsVersions'] = ResolversParentTypes['DiscogsVersions']> = ResolversObject<{
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   format?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -875,56 +876,56 @@ export type DiscogsVersionsResolvers<ContextType = any, ParentType extends Resol
   thumb?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type FolderResolvers<ContextType = any, ParentType extends ResolversParentTypes['Folder'] = ResolversParentTypes['Folder']> = {
+export type FolderResolvers<ContextType = any, ParentType extends ResolversParentTypes['Folder'] = ResolversParentTypes['Folder']> = ResolversObject<{
   count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type FormatResolvers<ContextType = any, ParentType extends ResolversParentTypes['Format'] = ResolversParentTypes['Format']> = {
+export type FormatResolvers<ContextType = any, ParentType extends ResolversParentTypes['Format'] = ResolversParentTypes['Format']> = ResolversObject<{
   descriptions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   qty?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   text?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type IdentifierResolvers<ContextType = any, ParentType extends ResolversParentTypes['Identifier'] = ResolversParentTypes['Identifier']> = {
+export type IdentifierResolvers<ContextType = any, ParentType extends ResolversParentTypes['Identifier'] = ResolversParentTypes['Identifier']> = ResolversObject<{
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type ImageResolvers<ContextType = any, ParentType extends ResolversParentTypes['Image'] = ResolversParentTypes['Image']> = {
+export type ImageResolvers<ContextType = any, ParentType extends ResolversParentTypes['Image'] = ResolversParentTypes['Image']> = ResolversObject<{
   height?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   resource_url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   width?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type InstanceNotesResolvers<ContextType = any, ParentType extends ResolversParentTypes['InstanceNotes'] = ResolversParentTypes['InstanceNotes']> = {
+export type InstanceNotesResolvers<ContextType = any, ParentType extends ResolversParentTypes['InstanceNotes'] = ResolversParentTypes['InstanceNotes']> = ResolversObject<{
   field_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type IsInCollectionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['IsInCollectionResponse'] = ResolversParentTypes['IsInCollectionResponse']> = {
+export type IsInCollectionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['IsInCollectionResponse'] = ResolversParentTypes['IsInCollectionResponse']> = ResolversObject<{
   isInCollection?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   pagination?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType>;
   releases?: Resolver<Array<Maybe<ResolversTypes['CollectionInstance']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type LabelResolvers<ContextType = any, ParentType extends ResolversParentTypes['Label'] = ResolversParentTypes['Label']> = {
+export type LabelResolvers<ContextType = any, ParentType extends ResolversParentTypes['Label'] = ResolversParentTypes['Label']> = ResolversObject<{
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type MasterReleaseResolvers<ContextType = any, ParentType extends ResolversParentTypes['MasterRelease'] = ResolversParentTypes['MasterRelease']> = {
+export type MasterReleaseResolvers<ContextType = any, ParentType extends ResolversParentTypes['MasterRelease'] = ResolversParentTypes['MasterRelease']> = ResolversObject<{
   artists?: Resolver<Array<Maybe<ResolversTypes['Artist']>>, ParentType, ContextType>;
   genres?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -939,32 +940,32 @@ export type MasterReleaseResolvers<ContextType = any, ParentType extends Resolve
   tracklist?: Resolver<Array<Maybe<ResolversTypes['TrackList']>>, ParentType, ContextType>;
   year?: Resolver<Maybe<ResolversTypes['StringOrInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type MasterSearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['MasterSearchResult'] = ResolversParentTypes['MasterSearchResult']> = {
+export type MasterSearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['MasterSearchResult'] = ResolversParentTypes['MasterSearchResult']> = ResolversObject<{
   isMasters?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   pagination?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType>;
   results?: Resolver<Array<Maybe<ResolversTypes['Releases']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   addRating?: Resolver<Maybe<ResolversTypes['VRRating']>, ParentType, ContextType, RequireFields<MutationAddRatingArgs, 'clarity' | 'flatness' | 'quietness' | 'releaseId'>>;
   addRelease?: Resolver<ResolversTypes['VRRelease'], ParentType, ContextType, RequireFields<MutationAddReleaseArgs, 'artist' | 'instanceId' | 'releaseId' | 'title'>>;
   addToCollection?: Resolver<Maybe<ResolversTypes['AddToCollectionResponse']>, ParentType, ContextType, RequireFields<MutationAddToCollectionArgs, 'folderId' | 'releaseId'>>;
   addWashedOn?: Resolver<Maybe<ResolversTypes['UserCopy']>, ParentType, ContextType, RequireFields<MutationAddWashedOnArgs, 'artist' | 'instanceId' | 'releaseId' | 'title' | 'washedOn'>>;
   removeFromCollection?: Resolver<Maybe<ResolversTypes['RemoveFromCollectionResponse']>, ParentType, ContextType, RequireFields<MutationRemoveFromCollectionArgs, 'folderId' | 'instanceId' | 'releaseId'>>;
-};
+}>;
 
-export type PaginationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Pagination'] = ResolversParentTypes['Pagination']> = {
+export type PaginationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Pagination'] = ResolversParentTypes['Pagination']> = ResolversObject<{
   items?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   page?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   pages?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   per_page?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   getArtist?: Resolver<ResolversTypes['ArtistPage'], ParentType, ContextType, RequireFields<QueryGetArtistArgs, 'id'>>;
   getCollection?: Resolver<ResolversTypes['Collection'], ParentType, ContextType, Partial<QueryGetCollectionArgs>>;
   getCustomFields?: Resolver<ResolversTypes['CustomFieldsResponse'], ParentType, ContextType>;
@@ -976,9 +977,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getSearch?: Resolver<Maybe<ResolversTypes['SearchResults']>, ParentType, ContextType, Partial<QueryGetSearchArgs>>;
   getUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<QueryGetUserArgs, 'auth'>>;
   getWantList?: Resolver<ResolversTypes['Wants'], ParentType, ContextType, Partial<QueryGetWantListArgs>>;
-};
+}>;
 
-export type ReleaseResolvers<ContextType = any, ParentType extends ResolversParentTypes['Release'] = ResolversParentTypes['Release']> = {
+export type ReleaseResolvers<ContextType = any, ParentType extends ResolversParentTypes['Release'] = ResolversParentTypes['Release']> = ResolversObject<{
   artists?: Resolver<Array<Maybe<ResolversTypes['Artist']>>, ParentType, ContextType>;
   artists_sort?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   community?: Resolver<Maybe<ResolversTypes['DiscogsCommunity']>, ParentType, ContextType>;
@@ -1002,50 +1003,50 @@ export type ReleaseResolvers<ContextType = any, ParentType extends ResolversPare
   vinylRatingsRelease?: Resolver<Maybe<ResolversTypes['VRRelease']>, ParentType, ContextType>;
   year?: Resolver<Maybe<ResolversTypes['StringOrInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type ReleasesResolvers<ContextType = any, ParentType extends ResolversParentTypes['Releases'] = ResolversParentTypes['Releases']> = {
+export type ReleasesResolvers<ContextType = any, ParentType extends ResolversParentTypes['Releases'] = ResolversParentTypes['Releases']> = ResolversObject<{
   basic_information?: Resolver<ResolversTypes['BasicInformation'], ParentType, ContextType>;
   date_added?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   rating?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type ReleasesSearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReleasesSearchResult'] = ResolversParentTypes['ReleasesSearchResult']> = {
+export type ReleasesSearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReleasesSearchResult'] = ResolversParentTypes['ReleasesSearchResult']> = ResolversObject<{
   isReleases?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   pagination?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType>;
   results?: Resolver<Array<Maybe<ResolversTypes['Releases']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type RemoveFromCollectionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['RemoveFromCollectionResponse'] = ResolversParentTypes['RemoveFromCollectionResponse']> = {
+export type RemoveFromCollectionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['RemoveFromCollectionResponse'] = ResolversParentTypes['RemoveFromCollectionResponse']> = ResolversObject<{
   isGood?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type SearchResultsResolvers<ContextType = any, ParentType extends ResolversParentTypes['SearchResults'] = ResolversParentTypes['SearchResults']> = {
+export type SearchResultsResolvers<ContextType = any, ParentType extends ResolversParentTypes['SearchResults'] = ResolversParentTypes['SearchResults']> = ResolversObject<{
   __resolveType: TypeResolveFn<'ArtistSearchResult' | 'MasterSearchResult' | 'ReleasesSearchResult', ParentType, ContextType>;
-};
+}>;
 
-export type SeriesEntryResolvers<ContextType = any, ParentType extends ResolversParentTypes['SeriesEntry'] = ResolversParentTypes['SeriesEntry']> = {
+export type SeriesEntryResolvers<ContextType = any, ParentType extends ResolversParentTypes['SeriesEntry'] = ResolversParentTypes['SeriesEntry']> = ResolversObject<{
   entity_type_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
 export interface StringOrIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['StringOrInt'], any> {
   name: 'StringOrInt';
 }
 
-export type TrackListResolvers<ContextType = any, ParentType extends ResolversParentTypes['TrackList'] = ResolversParentTypes['TrackList']> = {
+export type TrackListResolvers<ContextType = any, ParentType extends ResolversParentTypes['TrackList'] = ResolversParentTypes['TrackList']> = ResolversObject<{
   duration?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   position?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = ResolversObject<{
   _id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   avatarUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   discogsUserId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -1054,24 +1055,24 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   vinylRatings?: Resolver<Maybe<Array<Maybe<ResolversTypes['VRRating']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type UserCopyResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserCopy'] = ResolversParentTypes['UserCopy']> = {
+export type UserCopyResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserCopy'] = ResolversParentTypes['UserCopy']> = ResolversObject<{
   instanceId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   notes?: Resolver<Maybe<Array<Maybe<ResolversTypes['InstanceNotes']>>>, ParentType, ContextType>;
   releaseId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   username?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   washedOn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type UserDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserData'] = ResolversParentTypes['UserData']> = {
+export type UserDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserData'] = ResolversParentTypes['UserData']> = ResolversObject<{
   in_collection?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   in_wantlist?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type VrRatingResolvers<ContextType = any, ParentType extends ResolversParentTypes['VRRating'] = ResolversParentTypes['VRRating']> = {
+export type VrRatingResolvers<ContextType = any, ParentType extends ResolversParentTypes['VRRating'] = ResolversParentTypes['VRRating']> = ResolversObject<{
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   clarity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1083,9 +1084,9 @@ export type VrRatingResolvers<ContextType = any, ParentType extends ResolversPar
   updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type VrReleaseResolvers<ContextType = any, ParentType extends ResolversParentTypes['VRRelease'] = ResolversParentTypes['VRRelease']> = {
+export type VrReleaseResolvers<ContextType = any, ParentType extends ResolversParentTypes['VRRelease'] = ResolversParentTypes['VRRelease']> = ResolversObject<{
   artist?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   clarityAvg?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   currentUserRating?: Resolver<Maybe<ResolversTypes['VRRating']>, ParentType, ContextType>;
@@ -1098,22 +1099,22 @@ export type VrReleaseResolvers<ContextType = any, ParentType extends ResolversPa
   userCopy?: Resolver<Maybe<ResolversTypes['UserCopy']>, ParentType, ContextType>;
   vinylRatings?: Resolver<Maybe<Array<Maybe<ResolversTypes['VRRating']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type WantListReleasesResolvers<ContextType = any, ParentType extends ResolversParentTypes['WantListReleases'] = ResolversParentTypes['WantListReleases']> = {
+export type WantListReleasesResolvers<ContextType = any, ParentType extends ResolversParentTypes['WantListReleases'] = ResolversParentTypes['WantListReleases']> = ResolversObject<{
   basic_information?: Resolver<ResolversTypes['BasicInformation'], ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   rating?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type WantsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Wants'] = ResolversParentTypes['Wants']> = {
+export type WantsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Wants'] = ResolversParentTypes['Wants']> = ResolversObject<{
   pagination?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType>;
   wants?: Resolver<Maybe<Array<Maybe<ResolversTypes['WantListReleases']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type Resolvers<ContextType = any> = {
+export type Resolvers<ContextType = any> = ResolversObject<{
   AddToCollectionResponse?: AddToCollectionResponseResolvers<ContextType>;
   Artist?: ArtistResolvers<ContextType>;
   ArtistMember?: ArtistMemberResolvers<ContextType>;
@@ -1158,9 +1159,9 @@ export type Resolvers<ContextType = any> = {
   VRRelease?: VrReleaseResolvers<ContextType>;
   WantListReleases?: WantListReleasesResolvers<ContextType>;
   Wants?: WantsResolvers<ContextType>;
-};
+}>;
 
-export type DirectiveResolvers<ContextType = any> = {
+export type DirectiveResolvers<ContextType = any> = ResolversObject<{
   union?: UnionDirectiveResolver<any, any, ContextType>;
   abstractEntity?: AbstractEntityDirectiveResolver<any, any, ContextType>;
   entity?: EntityDirectiveResolver<any, any, ContextType>;
@@ -1169,6 +1170,6 @@ export type DirectiveResolvers<ContextType = any> = {
   link?: LinkDirectiveResolver<any, any, ContextType>;
   embedded?: EmbeddedDirectiveResolver<any, any, ContextType>;
   map?: MapDirectiveResolver<any, any, ContextType>;
-};
+}>;
 
 import { ObjectId } from 'mongodb';

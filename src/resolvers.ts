@@ -1,15 +1,26 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
+//  ts-ignore
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import { GraphQLScalarType, Kind, GraphQLError } from 'graphql';
+import {
+    Resolvers,
+    QueryResolvers,
+    MutationResolvers,
+    Resolver,
+    ResolverTypeWrapper,
+    Collection,
+    QueryGetCollectionArgs,
+    CollectionInstance,
+    Folder,
+} from './generated/graphql';
 
 import {
     generateQueryParams,
     updateRelease,
     sortByGenreArtist,
-    throwError,
     fetchFromDiscogs,
 } from './helpers/helpers.js';
 import Rating from './Schemas/Rating.schema.js';
@@ -22,12 +33,12 @@ const { DISCOGS_ENDPOINT, JWT_SECRET } = process.env;
 const getFolders = async (__, ___, context) => {
     const { username } = context;
 
-    const result = await fetchFromDiscogs({
+    const result: { folders: Folder[] } = await fetchFromDiscogs({
         url: `${DISCOGS_ENDPOINT}/users/${username}/collection/folders`,
         context,
     });
 
-    return result.folders || [];
+    return result?.folders ?? [];
 };
 
 const getCustomFields = async (__, ___, context) => {
@@ -41,7 +52,12 @@ const getCustomFields = async (__, ___, context) => {
     return result;
 };
 
-const getCollection = async (__, { folder, page, per_page, sort, sort_order }, context) => {
+const getCollection: Resolver<
+    ResolverTypeWrapper<Collection>,
+    {},
+    any,
+    Partial<QueryGetCollectionArgs>
+> = async (__, { folder, page, per_page, sort, sort_order }, context) => {
     const { username } = context;
     const queryParams = generateQueryParams({
         params: {
@@ -53,7 +69,7 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
         },
     });
 
-    const result = await fetchFromDiscogs({
+    const result: Collection | {} = await fetchFromDiscogs({
         url: `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folder}/releases${queryParams}`,
         context,
     });
@@ -109,7 +125,7 @@ const getSearch = async (
 
     if (type === 'release' || type === 'master') {
         formatted = await Promise.all(
-            result?.results?.map(async (release) => {
+            result?.results?.map(async (release: CollectionInstance) => {
                 const vrRelease = await Release.findOne({ releaseId: release.id });
 
                 const [artist, title] = release?.title?.split?.(' - ') ?? '';
@@ -520,44 +536,48 @@ const getUser = async (__, { auth }) => {
     return user;
 };
 
-export const resolvers = {
+const queries: QueryResolvers = {
+    getFolders,
+    getCustomFields,
+    getCollection,
+    getWantList,
+    getRelease,
+    getMasterRelease,
+    getMasterReleaseVersions,
+    getReleaseInCollection,
+    getSearch,
+    getUser,
+    getArtist,
+};
+
+const mutations: MutationResolvers = {
+    addRelease,
+    addToCollection,
+    removeFromCollection,
+    addRating,
+    addWashedOn,
+};
+
+export const resolvers: Resolvers = {
     SearchResults: {
-        __resolveType(obj, contextValue, info) {
-            if (obj.isReleases) {
+        __resolveType: (obj, contextValue, info) => {
+            if ((obj as ReleasesSearchResult).isReleases) {
                 return 'ReleasesSearchResult';
             }
-            if (obj.isArtists) {
+            if ((obj as ArtistSearchResult).isArtists) {
                 return 'ArtistSearchResult';
             }
-            if (obj.isLabels) {
-                return 'LabelSearchResult';
-            }
-            if (obj.isMasters) {
+            // if (obj.isLabels) {
+            //     return 'LabelSearchResult';
+            // }
+            if ((obj as MasterSearchResult).isMasters) {
                 return 'MasterSearchResult';
             }
             return null; // GraphQLError is thrown
         },
     },
-    Query: {
-        getFolders,
-        getCustomFields,
-        getCollection,
-        getWantList,
-        getRelease,
-        getMasterRelease,
-        getMasterReleaseVersions,
-        getReleaseInCollection,
-        getSearch,
-        getUser,
-        getArtist,
-    },
-    Mutation: {
-        addRelease,
-        addToCollection,
-        removeFromCollection,
-        addRating,
-        addWashedOn,
-    },
+    Query: queries,
+    Mutation: mutations,
     StringOrInt: new GraphQLScalarType({
         name: 'StringOrInt',
         description: 'A String or an Int union type',

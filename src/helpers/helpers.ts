@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import { GraphQLError } from 'graphql';
 import fetch from 'node-fetch';
+import { QueryResolvers, FolderResolvers } from '../generated/graphql';
 
 import Rating from '../Schemas/Rating.schema.js';
 

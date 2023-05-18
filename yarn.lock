@@ -846,7 +846,7 @@
     "@graphql-tools/utils" "^9.0.0"
     tslib "~2.5.0"
 
-"@graphql-codegen/typescript-mongodb@^2.4.6":
+"@graphql-codegen/typescript-mongodb@2.4.6":
   version "2.4.6"
   resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript-mongodb/-/typescript-mongodb-2.4.6.tgz#e443187a80a5aba35b67ebf541c318a3b0341813"
   integrity sha512-YvM7qBe6oTGx4Nn7Bf94SPfx/R5Ha1y7PwVQUsqKBgrQ1LL/tZMnqX81VSNC3QNaLDWJ/Uql1ZsC5PB96GXP3w==
