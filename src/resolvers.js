@@ -5,17 +5,17 @@
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import { GraphQLScalarType, Kind, GraphQLError } from 'graphql';
-import {
-    Resolvers,
-    QueryResolvers,
-    MutationResolvers,
-    Resolver,
-    ResolverTypeWrapper,
-    Collection,
-    QueryGetCollectionArgs,
-    CollectionInstance,
-    Folder,
-} from './generated/graphql';
+// import {
+//     Resolvers,
+//     QueryResolvers,
+//     MutationResolvers,
+//     Resolver,
+//     ResolverTypeWrapper,
+//     Collection,
+//     QueryGetCollectionArgs,
+//     CollectionInstance,
+//     Folder,
+// } from './generated/graphql';
 
 import {
     generateQueryParams,
@@ -33,7 +33,7 @@ const { DISCOGS_ENDPOINT, JWT_SECRET } = process.env;
 const getFolders = async (__, ___, context) => {
     const { username } = context;
 
-    const result: { folders: Folder[] } = await fetchFromDiscogs({
+    const result = await fetchFromDiscogs({
         url: `${DISCOGS_ENDPOINT}/users/${username}/collection/folders`,
         context,
     });
@@ -52,12 +52,7 @@ const getCustomFields = async (__, ___, context) => {
     return result;
 };
 
-const getCollection: Resolver<
-    ResolverTypeWrapper<Collection>,
-    {},
-    any,
-    Partial<QueryGetCollectionArgs>
-> = async (__, { folder, page, per_page, sort, sort_order }, context) => {
+const getCollection = async (__, { folder, page, per_page, sort, sort_order }, context) => {
     const { username } = context;
     const queryParams = generateQueryParams({
         params: {
@@ -69,7 +64,7 @@ const getCollection: Resolver<
         },
     });
 
-    const result: Collection | {} = await fetchFromDiscogs({
+    const result = await fetchFromDiscogs({
         url: `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folder}/releases${queryParams}`,
         context,
     });
@@ -125,7 +120,7 @@ const getSearch = async (
 
     if (type === 'release' || type === 'master') {
         formatted = await Promise.all(
-            result?.results?.map(async (release: CollectionInstance) => {
+            result?.results?.map(async (release) => {
                 const vrRelease = await Release.findOne({ releaseId: release.id });
 
                 const [artist, title] = release?.title?.split?.(' - ') ?? '';
@@ -536,7 +531,7 @@ const getUser = async (__, { auth }) => {
     return user;
 };
 
-const queries: QueryResolvers = {
+const queries = {
     getFolders,
     getCustomFields,
     getCollection,
@@ -550,7 +545,7 @@ const queries: QueryResolvers = {
     getArtist,
 };
 
-const mutations: MutationResolvers = {
+const mutations = {
     addRelease,
     addToCollection,
     removeFromCollection,
@@ -558,19 +553,19 @@ const mutations: MutationResolvers = {
     addWashedOn,
 };
 
-export const resolvers: Resolvers = {
+export const resolvers = {
     SearchResults: {
         __resolveType: (obj, contextValue, info) => {
-            if ((obj as ReleasesSearchResult).isReleases) {
+            if (obj.isReleases) {
                 return 'ReleasesSearchResult';
             }
-            if ((obj as ArtistSearchResult).isArtists) {
+            if (obj.isArtists) {
                 return 'ArtistSearchResult';
             }
             // if (obj.isLabels) {
             //     return 'LabelSearchResult';
             // }
-            if ((obj as MasterSearchResult).isMasters) {
+            if (obj.isMasters) {
                 return 'MasterSearchResult';
             }
             return null; // GraphQLError is thrown
