@@ -386,7 +386,7 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
         const release = await Release.findOne({ releaseId });
 
         if (!release) {
-            return { isGood: response.status === 204 };
+            return { success: response.status === 204 };
         }
 
         if (userCopy) {
@@ -399,7 +399,7 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
             });
         }
 
-        return { isGood: response.status === 204 };
+        return { success: response.status === 204 };
     } catch (error) {
         console.error(error);
         throw new GraphQLError(`removeFromCollection: ${error}`);
@@ -407,26 +407,26 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
 };
 
 const addRelease = async (__, { releaseId, instanceId, title, artist }, context) => {
-    const { username } = context;
+    // const { username } = context;
 
-    const user = await User.findOne({ username });
+    // const user = await User.findOne({ username });
 
-    let userCopy = await UserCopy.findOne({ instanceId, user });
+    // let userCopy = await UserCopy.findOne({ instanceId, user });
     let release = await Release.findOne({ releaseId });
 
     if (!release) {
         release = await Release.create({ releaseId, title, artist });
     }
 
-    if (!userCopy) {
-        userCopy = await UserCopy.create({
-            instanceId,
-            releaseId,
-            washedOn: '',
-            release,
-            user,
-        });
-    }
+    // if (!userCopy) {
+    //     userCopy = await UserCopy.create({
+    //         instanceId,
+    //         releaseId,
+    //         washedOn: '',
+    //         release,
+    //         user,
+    //     });
+    // }
 
     return release;
 };
@@ -479,25 +479,17 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
     return null;
 };
 
-const addWashedOn = async (__, { releaseId, instanceId, washedOn, title, artist }, context) => {
+const addWashedOn = async (__, { instanceId, washedOn }, context) => {
     const { username } = context;
 
     try {
         const user = await User.findOne({ username });
-        let userCopy = await UserCopy.findOne({ releaseId, user });
+        let userCopy = await UserCopy.findOne({ instanceId, user });
 
         if (!userCopy) {
-            let release = await Release.findOne({ releaseId });
-
-            if (!release) {
-                release = await Release.create({ releaseId, title, artist });
-            }
-
             userCopy = await UserCopy.create({
-                releaseId,
                 instanceId,
                 washedOn: '',
-                release,
                 user,
             });
         }
@@ -512,6 +504,52 @@ const addWashedOn = async (__, { releaseId, instanceId, washedOn, title, artist 
     }
 
     return null;
+};
+
+const updateCustomField = async (
+    __,
+    { releaseId, fieldId, value, folderId, instanceId },
+    context
+) => {
+    const { username, Authorization } = context;
+
+    try {
+        const response = await fetch(
+            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}/instances/${instanceId}/fields/${fieldId}
+            `,
+            {
+                method: 'POST',
+                headers: { Authorization, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ value }),
+            }
+        );
+
+        return { success: response.status === 204 };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`updateCustomField: ${error}`);
+    }
+};
+
+const updateInstanceFolder = async (__, { releaseId, instanceId, folderId, value }, context) => {
+    const { username, Authorization } = context;
+
+    try {
+        const response = await fetch(
+            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}/instances/${instanceId}
+            `,
+            {
+                method: 'POST',
+                headers: { Authorization, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_id: value }),
+            }
+        );
+
+        return { success: response.status === 204 };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`updateCustomField: ${error}`);
+    }
 };
 
 const getUser = async (__, { auth }) => {
@@ -551,6 +589,8 @@ const mutations = {
     removeFromCollection,
     addRating,
     addWashedOn,
+    updateCustomField,
+    updateInstanceFolder,
 };
 
 export const resolvers = {

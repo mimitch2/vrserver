@@ -43,7 +43,8 @@
         "mongoose-float": "^1.0.4",
         "node-fetch": "^3.2.9",
         "nodemon": "^2.0.19",
-        "typescript": "^5.0.4"
+        "typescript": "^5.0.4",
+        "vinylratings-common": "https://github.com/mimitch2/vinylratings-common#1.0.11"
     },
     "devDependencies": {
         "@graphql-codegen/cli": "3.3.1",
