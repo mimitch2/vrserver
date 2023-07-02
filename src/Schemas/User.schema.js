@@ -42,6 +42,9 @@ const userSchema = new Schema(
             type: Number,
             required: true,
         },
+        washedOnField: {
+            type: String,
+        },
     },
     { timestamps: true }
 );

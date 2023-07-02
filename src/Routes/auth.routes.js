@@ -114,6 +114,7 @@ router.get('/return', async (req, res, next) => {
                         discogsUserId,
                         releasesRated: 0,
                         avatarUrl: userData?.avatar_url || null,
+                        washedOnField: '',
                     });
                 } catch (error) {
                     const errorMessage = `Failed to create new user: ${error}`;

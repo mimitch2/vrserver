@@ -284,6 +284,7 @@ type User {
     discogsUserId: Int!
     releasesRated: Int!
     vinylRatings: [VRRating]
+    washedOnField: String
 }
 
 type Folder {
@@ -403,4 +404,5 @@ type Mutation {
         folderId: Int!
         value: String!
     ): MutationSuccessResponse
+    updateUser(key: String, value: String): User
 }

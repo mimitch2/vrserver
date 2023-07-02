@@ -552,6 +552,24 @@ const updateInstanceFolder = async (__, { releaseId, instanceId, folderId, value
     }
 };
 
+const updateUser = async (__, { key, value }, context) => {
+    const { username } = context;
+
+    try {
+        const user = await User.findOne({ username });
+
+        if (user) {
+            await user.updateOne({ username, [key]: value });
+            return user;
+        }
+
+        throw new Error('Cannot updated user settings: user not found');
+    } catch (error) {
+        console.error(error);
+        throw new Error(`updateUser: ${error}`);
+    }
+};
+
 const getUser = async (__, { auth }) => {
     if (!auth) {
         return null;
@@ -591,6 +609,7 @@ const mutations = {
     addWashedOn,
     updateCustomField,
     updateInstanceFolder,
+    updateUser,
 };
 
 export const resolvers = {
