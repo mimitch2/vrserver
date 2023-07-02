@@ -506,25 +506,26 @@ const addWashedOn = async (__, { instanceId, washedOn }, context) => {
     return null;
 };
 
-const updateCustomField = async (
-    __,
-    { releaseId, fieldId, value, folderId, instanceId },
-    context
-) => {
+const updateCustomField = async (__, { values, releaseId, folderId, instanceId }, context) => {
     const { username, Authorization } = context;
 
     try {
-        const response = await fetch(
-            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}/instances/${instanceId}/fields/${fieldId}
-            `,
-            {
-                method: 'POST',
-                headers: { Authorization, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ value }),
-            }
+        const promises = values.map(({ fieldId, value }) =>
+            fetch(
+                `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}/instances/${instanceId}/fields/${fieldId}
+                `,
+                {
+                    method: 'POST',
+                    headers: { Authorization, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value }),
+                }
+            )
         );
 
-        return { success: response.status === 204 };
+        const response = await Promise.allSettled(promises);
+        const success = response.every(({ status }) => status === 'fulfilled');
+
+        return { success };
     } catch (error) {
         console.error(error);
         throw new GraphQLError(`updateCustomField: ${error}`);

@@ -367,6 +367,11 @@ type Query {
 #     value: String
 # }
 
+input CustomFieldValuesInput {
+    fieldId: Int!
+    value: String!
+}
+
 type Mutation {
     addRelease(
         releaseId: Int!
@@ -392,9 +397,8 @@ type Mutation {
         washedOn: String! # title: String! # artist: String!
     ): UserCopy
     updateCustomField(
+        values: [CustomFieldValuesInput!]!
         releaseId: Int!
-        fieldId: Int!
-        value: String!
         folderId: Int!
         instanceId: Int!
     ): MutationSuccessResponse
