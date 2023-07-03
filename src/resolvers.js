@@ -532,7 +532,11 @@ const updateCustomField = async (__, { values, releaseId, folderId, instanceId }
     }
 };
 
-const updateInstanceFolder = async (__, { releaseId, instanceId, folderId, value }, context) => {
+const updateInstanceFolder = async (
+    __,
+    { releaseId, instanceId, folderId, newFolderId },
+    context
+) => {
     const { username, Authorization } = context;
 
     try {
@@ -542,7 +546,7 @@ const updateInstanceFolder = async (__, { releaseId, instanceId, folderId, value
             {
                 method: 'POST',
                 headers: { Authorization, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ folder_id: value }),
+                body: JSON.stringify({ folder_id: newFolderId }),
             }
         );
 

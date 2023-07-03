@@ -406,7 +406,7 @@ type Mutation {
         releaseId: Int!
         instanceId: Int!
         folderId: Int!
-        value: String!
+        newFolderId: Int!
     ): MutationSuccessResponse
     updateUser(key: String, value: String): User
 }
