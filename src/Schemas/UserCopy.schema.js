@@ -4,10 +4,6 @@ const { Schema, model } = mongoose;
 
 const userCopySchema = new Schema(
     {
-        releaseId: {
-            type: Number,
-            required: true,
-        },
         instanceId: {
             type: Number,
             required: true,
@@ -15,11 +11,6 @@ const userCopySchema = new Schema(
         washedOn: {
             type: String,
             default: '',
-        },
-        release: {
-            type: Schema.Types.ObjectId,
-            ref: 'Release',
-            required: true,
         },
         user: {
             type: Schema.Types.ObjectId,

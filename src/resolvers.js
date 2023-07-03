@@ -1,11 +1,28 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
+//  ts-ignore
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import { GraphQLScalarType, Kind, GraphQLError } from 'graphql';
+// import {
+//     Resolvers,
+//     QueryResolvers,
+//     MutationResolvers,
+//     Resolver,
+//     ResolverTypeWrapper,
+//     Collection,
+//     QueryGetCollectionArgs,
+//     CollectionInstance,
+//     Folder,
+// } from './generated/graphql';
 
-import { generateQueryParams, updateRelease, sortByGenreArtist } from './helpers/helpers.js';
+import {
+    generateQueryParams,
+    updateRelease,
+    sortByGenreArtist,
+    fetchFromDiscogs,
+} from './helpers/helpers.js';
 import Rating from './Schemas/Rating.schema.js';
 import Release from './Schemas/Release.schema.js';
 import User from './Schemas/User.schema.js';
@@ -14,39 +31,29 @@ import UserCopy from './Schemas/UserCopy.schema.js';
 const { DISCOGS_ENDPOINT, JWT_SECRET } = process.env;
 
 const getFolders = async (__, ___, context) => {
-    const { username, Authorization } = context;
+    const { username } = context;
 
-    const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/collection/folders`, {
-        headers: {
-            Authorization,
-        },
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/users/${username}/collection/folders`,
+        context,
     });
 
-    const result = await response.json();
-
-    return result.folders || [];
+    return result?.folders ?? [];
 };
 
 const getCustomFields = async (__, ___, context) => {
-    const { username, Authorization } = context;
+    const { username } = context;
 
-    try {
-        const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/collection/fields`, {
-            headers: {
-                Authorization,
-            },
-        });
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/users/${username}/collection/fields`,
+        context,
+    });
 
-        const result = await response.json();
-
-        return result;
-    } catch (error) {
-        console.error(error);
-        throw new GraphQLError(`getSearch: ${error}`);
-    }
+    return result;
 };
 
 const getCollection = async (__, { folder, page, per_page, sort, sort_order }, context) => {
+    const { username } = context;
     const queryParams = generateQueryParams({
         params: {
             format: 'Vinyl',
@@ -56,41 +63,29 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
             sort_order,
         },
     });
-    const { username, Authorization } = context;
 
-    try {
-        const response = await fetch(
-            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folder}/releases${queryParams}`,
-            {
-                headers: {
-                    Authorization,
-                },
-            }
-        );
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folder}/releases${queryParams}`,
+        context,
+    });
 
-        const result = await response.json();
+    const formatted =
+        (await Promise.all(
+            result?.releases?.map(async (release) => {
+                const VrRelease = await Release.findOne({ releaseId: release.id });
 
-        const formatted =
-            (await Promise.all(
-                result?.releases?.map(async (release) => {
-                    const VrRelease = await Release.findOne({ releaseId: release.id });
+                return {
+                    ...release,
+                    rating: VrRelease?.ratingAvg ?? 0,
+                    basic_information: {
+                        ...release.basic_information,
+                        type: 'release',
+                    },
+                };
+            })
+        )) ?? [];
 
-                    return {
-                        ...release,
-                        rating: VrRelease?.ratingAvg ?? 0,
-                        basic_information: {
-                            ...release.basic_information,
-                            type: 'release',
-                        },
-                    };
-                })
-            )) ?? [];
-
-        return { pagination: result.pagination, releases: formatted };
-    } catch (error) {
-        console.error(error);
-        throw new GraphQLError(`getSearch: ${error}`);
-    }
+    return { pagination: result.pagination, releases: formatted };
 };
 
 const getSearch = async (
@@ -115,67 +110,61 @@ const getSearch = async (
     const queryParams = generateQueryParams({
         params,
     });
-    const { Authorization } = context;
 
-    try {
-        const response = await fetch(`${DISCOGS_ENDPOINT}/database/search${queryParams}`, {
-            headers: { Authorization },
-        });
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/database/search${queryParams}`,
+        context,
+    });
 
-        const result = await response.json();
+    let formatted = [];
 
-        let formatted = [];
+    if (type === 'release' || type === 'master') {
+        formatted = await Promise.all(
+            result?.results?.map(async (release) => {
+                const vrRelease = await Release.findOne({ releaseId: release.id });
 
-        if (type === 'release' || type === 'master') {
-            formatted = await Promise.all(
-                result?.results?.map(async (release) => {
-                    const vrRelease = await Release.findOne({ releaseId: release.id });
+                const [artist, title] = release?.title?.split?.(' - ') ?? '';
 
-                    const [artist, title] = release?.title?.split?.(' - ') ?? '';
-
-                    return {
-                        id: release.id,
-                        rating: vrRelease?.ratingAvg ?? 0,
-                        basic_information: {
-                            ...release,
-                            artists: [{ name: artist || 'Unknown' }],
-                            title: title || 'Unknown',
-                            styles: release.style,
-                        },
-                    };
-                })
-            );
-        } else if (type === 'artist') {
-            formatted = await result.results;
-        }
-
-        let typeKey;
-
-        switch (type) {
-            case 'release':
-                typeKey = 'isReleases';
-                break;
-            case 'artist':
-                typeKey = 'isArtists';
-                break;
-            case 'master':
-                typeKey = 'isMasters';
-                break;
-            case 'label':
-                typeKey = 'isLabels';
-                break;
-            default:
-                typeKey = 'isReleases';
-        }
-
-        return { [typeKey]: true, pagination: result.pagination, results: formatted };
-    } catch (error) {
-        console.error(error);
-        throw new GraphQLError(`getSearch: ${error}`);
+                return {
+                    id: release.id,
+                    rating: vrRelease?.ratingAvg ?? 0,
+                    basic_information: {
+                        ...release,
+                        artists: [{ name: artist || 'Unknown' }],
+                        title: title || 'Unknown',
+                        styles: release.style,
+                    },
+                };
+            })
+        );
+    } else if (type === 'artist') {
+        formatted = await result.results;
     }
+
+    let typeKey;
+
+    switch (type) {
+        case 'release':
+            typeKey = 'isReleases';
+            break;
+        case 'artist':
+            typeKey = 'isArtists';
+            break;
+        case 'master':
+            typeKey = 'isMasters';
+            break;
+        case 'label':
+            typeKey = 'isLabels';
+            break;
+        default:
+            typeKey = 'isReleases';
+    }
+
+    return { [typeKey]: true, pagination: result.pagination, results: formatted };
 };
 
 const getWantList = async (__, { page, per_page, sort, sort_order }, context) => {
+    const { username } = context;
     const isCustomWantListSorted = sort === 'genre/artist';
 
     const queryParams = generateQueryParams(
@@ -193,64 +182,57 @@ const getWantList = async (__, { page, per_page, sort, sort_order }, context) =>
               }
     );
 
-    const { username, Authorization } = context;
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/users/${username}/wants${queryParams}`,
+        context,
+    });
 
-    try {
-        const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/wants${queryParams}`, {
-            headers: {
-                Authorization,
-            },
-        });
+    const formatted =
+        (await Promise.all(
+            result?.wants?.map(async (release) => {
+                const vrRelease = await Release.findOne({ releaseId: release.id });
 
-        const result = await response.json();
+                return {
+                    ...release,
+                    rating: vrRelease?.ratingAvg ?? 0,
+                };
+            })
+        )) ?? [];
 
-        const formatted =
-            (await Promise.all(
-                result?.wants?.map(async (release) => {
-                    const vrRelease = await Release.findOne({ releaseId: release.id });
-
-                    return {
-                        ...release,
-                        rating: vrRelease?.ratingAvg ?? 0,
-                    };
-                })
-            )) ?? [];
-
-        return isCustomWantListSorted
-            ? {
-                  wants: sortByGenreArtist({ arr: formatted, sortOrder: sort_order }),
-                  pagination: result.pagination,
-              }
-            : { pagination: result.pagination, wants: formatted };
-    } catch (error) {
-        console.error(error);
-        throw new GraphQLError(`getWantList: ${error}`);
-    }
+    return isCustomWantListSorted
+        ? {
+              wants: sortByGenreArtist({ arr: formatted, sortOrder: sort_order }),
+              pagination: result.pagination,
+          }
+        : { pagination: result.pagination, wants: formatted };
 };
 
 const getRelease = async (__, { id, instanceId }, context) => {
-    const { username, Authorization } = context;
+    const { username } = context;
 
-    try {
-        const releaseResponse = await fetch(`${DISCOGS_ENDPOINT}/releases/${id}`, {
-            headers: { Authorization },
-        });
+    const discogsRelease = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/releases/${id}`,
+        context,
+    });
 
-        const discogsRelease = await releaseResponse.json();
+    const release = await Release.findOne({ releaseId: id }).populate({
+        path: 'vinylRatings',
+        populate: {
+            path: 'user',
+        },
+    });
 
-        const release = await Release.findOne({ releaseId: id }).populate({
-            path: 'vinylRatings',
-            populate: {
-                path: 'user',
-            },
-        });
+    if (release) {
+        const user = await User.findOne({ username });
+        const userCopy = await UserCopy.findOne({ instanceId, user });
+        const userRating = await Rating.findOne({ user });
 
-        if (release) {
-            const user = await User.findOne({ username });
-            const userCopy = await UserCopy.findOne({ instanceId, user });
-            const userRating = await Rating.findOne({ user });
+        const { artist, title, ratingsCount, ratingAvg, quietnessAvg, flatnessAvg, clarityAvg } =
+            release;
 
-            const {
+        return {
+            ...discogsRelease,
+            vinylRatingsRelease: {
                 artist,
                 title,
                 ratingsCount,
@@ -258,47 +240,23 @@ const getRelease = async (__, { id, instanceId }, context) => {
                 quietnessAvg,
                 flatnessAvg,
                 clarityAvg,
-            } = release;
-
-            return {
-                ...discogsRelease,
-                vinylRatingsRelease: {
-                    artist,
-                    title,
-                    ratingsCount,
-                    ratingAvg,
-                    quietnessAvg,
-                    flatnessAvg,
-                    clarityAvg,
-                    userCopy,
-                    currentUserRating: userRating || null,
-                    vinylRatings: release.vinylRatings || null,
-                },
-            };
-        }
-
-        return { ...discogsRelease, vinylRatingsRelease: null };
-    } catch (error) {
-        console.error(error);
-        throw new GraphQLError(`getRelease: ${error}`);
+                userCopy,
+                currentUserRating: userRating || null,
+                vinylRatings: release.vinylRatings || null,
+            },
+        };
     }
+
+    return { ...discogsRelease, vinylRatingsRelease: null };
 };
 
 const getMasterRelease = async (__, { id }, context) => {
-    const { Authorization } = context;
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/masters/${id}`,
+        context,
+    });
 
-    try {
-        const response = await fetch(`${DISCOGS_ENDPOINT}/masters/${id}`, {
-            headers: { Authorization },
-        });
-
-        const result = await response.json();
-
-        return result;
-    } catch (error) {
-        console.error(error);
-        throw new GraphQLError(`getMasterRelease: ${error}`);
-    }
+    return result;
 };
 
 const getMasterReleaseVersions = async (
@@ -317,47 +275,35 @@ const getMasterReleaseVersions = async (
             // country,
         },
     });
-    const { Authorization } = context;
 
-    try {
-        const response = await fetch(
-            `${DISCOGS_ENDPOINT}/masters/${master_id}/versions${queryParams}`,
-            {
-                headers: {
-                    Authorization,
-                },
-            }
-        );
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/masters/${master_id}/versions${queryParams}`,
+        context,
+    });
 
-        const result = await response.json();
+    const formatted =
+        (await Promise.all(
+            result?.versions?.map(async (version) => {
+                const vrRelease = await Release.findOne({ releaseId: version.id });
 
-        const formatted =
-            (await Promise.all(
-                result?.versions?.map(async (version) => {
-                    const vrRelease = await Release.findOne({ releaseId: version.id });
+                return {
+                    id: version.id,
+                    rating: vrRelease?.ratingAvg ?? 0,
+                    basic_information: {
+                        ...version,
+                        user_data: version.stats.user,
+                        label: version.label.split(', ') ?? [],
+                        format: version.format.split(', ') ?? [],
+                        styles: [],
+                        genres: [],
+                        formats: [],
+                        artists: [],
+                    },
+                };
+            })
+        )) ?? [];
 
-                    return {
-                        id: version.id,
-                        rating: vrRelease?.ratingAvg ?? 0,
-                        basic_information: {
-                            ...version,
-                            user_data: version.stats.user,
-                            label: version.label.split(', ') ?? [],
-                            format: version.format.split(', ') ?? [],
-                            styles: [],
-                            genres: [],
-                            formats: [],
-                            artists: [],
-                        },
-                    };
-                })
-            )) ?? [];
-
-        return { pagination: result.pagination, versions: formatted };
-    } catch (error) {
-        console.error(error);
-        throw new GraphQLError(`getSearch: ${error}`);
-    }
+    return { pagination: result.pagination, versions: formatted };
 };
 
 const getReleaseInCollection = async (__, { id }, context) => {
@@ -440,7 +386,7 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
         const release = await Release.findOne({ releaseId });
 
         if (!release) {
-            return { isGood: response.status === 204 };
+            return { success: response.status === 204 };
         }
 
         if (userCopy) {
@@ -453,7 +399,7 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
             });
         }
 
-        return { isGood: response.status === 204 };
+        return { success: response.status === 204 };
     } catch (error) {
         console.error(error);
         throw new GraphQLError(`removeFromCollection: ${error}`);
@@ -461,26 +407,26 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
 };
 
 const addRelease = async (__, { releaseId, instanceId, title, artist }, context) => {
-    const { username } = context;
+    // const { username } = context;
 
-    const user = await User.findOne({ username });
+    // const user = await User.findOne({ username });
 
-    let userCopy = await UserCopy.findOne({ instanceId, user });
+    // let userCopy = await UserCopy.findOne({ instanceId, user });
     let release = await Release.findOne({ releaseId });
 
     if (!release) {
         release = await Release.create({ releaseId, title, artist });
     }
 
-    if (!userCopy) {
-        userCopy = await UserCopy.create({
-            instanceId,
-            releaseId,
-            washedOn: '',
-            release,
-            user,
-        });
-    }
+    // if (!userCopy) {
+    //     userCopy = await UserCopy.create({
+    //         instanceId,
+    //         releaseId,
+    //         washedOn: '',
+    //         release,
+    //         user,
+    //     });
+    // }
 
     return release;
 };
@@ -533,25 +479,17 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
     return null;
 };
 
-const addWashedOn = async (__, { releaseId, instanceId, washedOn, title, artist }, context) => {
+const addWashedOn = async (__, { instanceId, washedOn }, context) => {
     const { username } = context;
 
     try {
         const user = await User.findOne({ username });
-        let userCopy = await UserCopy.findOne({ releaseId, user });
+        let userCopy = await UserCopy.findOne({ instanceId, user });
 
         if (!userCopy) {
-            let release = await Release.findOne({ releaseId });
-
-            if (!release) {
-                release = await Release.create({ releaseId, title, artist });
-            }
-
             userCopy = await UserCopy.create({
-                releaseId,
                 instanceId,
                 washedOn: '',
-                release,
                 user,
             });
         }
@@ -566,6 +504,75 @@ const addWashedOn = async (__, { releaseId, instanceId, washedOn, title, artist 
     }
 
     return null;
+};
+
+const updateCustomField = async (__, { values, releaseId, folderId, instanceId }, context) => {
+    const { username, Authorization } = context;
+
+    try {
+        const promises = values.map(({ fieldId, value }) =>
+            fetch(
+                `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}/instances/${instanceId}/fields/${fieldId}
+                `,
+                {
+                    method: 'POST',
+                    headers: { Authorization, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value }),
+                }
+            )
+        );
+
+        const response = await Promise.allSettled(promises);
+        const success = response.every(({ status }) => status === 'fulfilled');
+
+        return { success };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`updateCustomField: ${error}`);
+    }
+};
+
+const updateInstanceFolder = async (
+    __,
+    { releaseId, instanceId, folderId, newFolderId },
+    context
+) => {
+    const { username, Authorization } = context;
+
+    try {
+        const response = await fetch(
+            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}/instances/${instanceId}
+            `,
+            {
+                method: 'POST',
+                headers: { Authorization, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_id: newFolderId }),
+            }
+        );
+
+        return { success: response.status === 204 };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`updateCustomField: ${error}`);
+    }
+};
+
+const updateUser = async (__, { key, value }, context) => {
+    const { username } = context;
+
+    try {
+        const user = await User.findOne({ username });
+
+        if (user) {
+            await user.updateOne({ username, [key]: value });
+            return user;
+        }
+
+        throw new Error('Cannot updated user settings: user not found');
+    } catch (error) {
+        console.error(error);
+        throw new Error(`updateUser: ${error}`);
+    }
 };
 
 const getUser = async (__, { auth }) => {
@@ -585,44 +592,51 @@ const getUser = async (__, { auth }) => {
     return user;
 };
 
+const queries = {
+    getFolders,
+    getCustomFields,
+    getCollection,
+    getWantList,
+    getRelease,
+    getMasterRelease,
+    getMasterReleaseVersions,
+    getReleaseInCollection,
+    getSearch,
+    getUser,
+    getArtist,
+};
+
+const mutations = {
+    addRelease,
+    addToCollection,
+    removeFromCollection,
+    addRating,
+    addWashedOn,
+    updateCustomField,
+    updateInstanceFolder,
+    updateUser,
+};
+
 export const resolvers = {
     SearchResults: {
-        __resolveType(obj, contextValue, info) {
+        __resolveType: (obj, contextValue, info) => {
             if (obj.isReleases) {
                 return 'ReleasesSearchResult';
             }
             if (obj.isArtists) {
                 return 'ArtistSearchResult';
             }
-            if (obj.isLabels) {
-                return 'LabelSearchResult';
-            }
+            // if (obj.isLabels) {
+            //     return 'LabelSearchResult';
+            // }
             if (obj.isMasters) {
                 return 'MasterSearchResult';
             }
             return null; // GraphQLError is thrown
         },
     },
-    Query: {
-        getFolders,
-        getCustomFields,
-        getCollection,
-        getWantList,
-        getRelease,
-        getMasterRelease,
-        getMasterReleaseVersions,
-        getReleaseInCollection,
-        getSearch,
-        getUser,
-        getArtist,
-    },
-    Mutation: {
-        addRelease,
-        addToCollection,
-        removeFromCollection,
-        addRating,
-        addWashedOn,
-    },
+    Query: queries,
+    Mutation: mutations,
     StringOrInt: new GraphQLScalarType({
         name: 'StringOrInt',
         description: 'A String or an Int union type',

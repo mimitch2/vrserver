@@ -80,6 +80,8 @@ type InstanceNotes {
 
 type Releases {
     id: ID!
+    instance_id: ID
+    notes: [InstanceNotes]
     date_added: String
     rating: Float
     basic_information: BasicInformation!
@@ -88,7 +90,7 @@ type Releases {
 type CollectionInstance {
     id: ID!
     date_added: String
-    instance_id: ID!
+    instance_id: ID
     folder_id: ID
     rating: Float
     notes: [InstanceNotes]
@@ -282,6 +284,7 @@ type User {
     discogsUserId: Int!
     releasesRated: Int!
     vinylRatings: [VRRating]
+    washedOnField: String
 }
 
 type Folder {
@@ -305,10 +308,12 @@ type CustomFieldsResponse {
 
 type AddToCollectionResponse {
     instance_id: String!
+    folder_id: ID!
+    id: ID!
 }
 
-type RemoveFromCollectionResponse {
-    isGood: Boolean
+type MutationSuccessResponse {
+    success: Boolean
 }
 
 type Query {
@@ -362,10 +367,15 @@ type Query {
 #     value: String
 # }
 
+input CustomFieldValuesInput {
+    fieldId: Int!
+    value: String!
+}
+
 type Mutation {
     addRelease(
         releaseId: Int!
-        instanceId: Int!
+        # instanceId: Int!
         title: String!
         artist: String! # notes: [NotesInput]
     ): VRRelease!
@@ -374,7 +384,7 @@ type Mutation {
         folderId: Int!
         releaseId: Int!
         instanceId: Int!
-    ): RemoveFromCollectionResponse
+    ): MutationSuccessResponse!
     addRating(
         releaseId: Int!
         quietness: Int!
@@ -383,10 +393,20 @@ type Mutation {
         notes: String
     ): VRRating
     addWashedOn(
+        instanceId: Int!
+        washedOn: String! # title: String! # artist: String!
+    ): UserCopy
+    updateCustomField(
+        values: [CustomFieldValuesInput!]!
+        releaseId: Int!
+        folderId: Int!
+        instanceId: Int!
+    ): MutationSuccessResponse
+    updateInstanceFolder(
         releaseId: Int!
         instanceId: Int!
-        washedOn: String!
-        title: String!
-        artist: String!
-    ): UserCopy
+        folderId: Int!
+        newFolderId: Int!
+    ): MutationSuccessResponse
+    updateUser(key: String, value: String): User
 }
