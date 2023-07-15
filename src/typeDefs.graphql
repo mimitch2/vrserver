@@ -218,10 +218,18 @@ type DiscogsMasterVersions {
     versions: [Releases]
 }
 
-type WantListReleases {
+type WantListNotFound {
+    message: String!
+}
+
+type WantListRelease {
     rating: Int
     id: Int
     basic_information: BasicInformation!
+}
+
+type IsInWantListResponse {
+    isInWantList: Boolean!
 }
 
 type Image {
@@ -232,7 +240,7 @@ type Image {
 
 type Wants {
     pagination: Pagination!
-    wants: [WantListReleases]
+    wants: [WantListRelease]
 }
 
 input Ratings {
@@ -312,6 +320,13 @@ type AddToCollectionResponse {
     id: ID!
 }
 
+type AddToWantListResponse {
+    id: ID
+    notes: String
+    rating: Int
+    basic_information: BasicInformation
+}
+
 type MutationSuccessResponse {
     success: Boolean
 }
@@ -336,7 +351,8 @@ type Query {
         offset: Int
         limit: Int
     ): Wants!
-    getRelease(id: Int!, instanceId: Int): Release!
+    getIsInWantList(releaseId: Int!): IsInWantListResponse!
+    getRelease(id: Int!): Release!
     getMasterRelease(id: Int!): MasterRelease!
     getMasterReleaseVersions(
         master_id: ID
@@ -380,6 +396,7 @@ type Mutation {
         artist: String! # notes: [NotesInput]
     ): VRRelease!
     addToCollection(releaseId: Int!, folderId: Int!): AddToCollectionResponse
+    addToWantList(releaseId: Int!, notes: String): AddToWantListResponse
     removeFromCollection(
         folderId: Int!
         releaseId: Int!
@@ -392,10 +409,10 @@ type Mutation {
         flatness: Int!
         notes: String
     ): VRRating
-    addWashedOn(
-        instanceId: Int!
-        washedOn: String! # title: String! # artist: String!
-    ): UserCopy
+    # addWashedOn(
+    #     instanceId: Int!
+    #     washedOn: String! # title: String! # artist: String!
+    # ): UserCopy
     updateCustomField(
         values: [CustomFieldValuesInput!]!
         releaseId: Int!

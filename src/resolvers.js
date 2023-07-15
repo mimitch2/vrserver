@@ -26,7 +26,7 @@ import {
 import Rating from './Schemas/Rating.schema.js';
 import Release from './Schemas/Release.schema.js';
 import User from './Schemas/User.schema.js';
-import UserCopy from './Schemas/UserCopy.schema.js';
+// import UserCopy from './Schemas/UserCopy.schema.js';
 
 const { DISCOGS_ENDPOINT, JWT_SECRET } = process.env;
 
@@ -207,7 +207,20 @@ const getWantList = async (__, { page, per_page, sort, sort_order }, context) =>
         : { pagination: result.pagination, wants: formatted };
 };
 
-const getRelease = async (__, { id, instanceId }, context) => {
+const getIsInWantList = async (__, { releaseId }, context) => {
+    const { username } = context;
+
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/users/${username}/wants/${releaseId}`,
+        context,
+    });
+
+    return {
+        isInWantList: !result?.message,
+    };
+};
+
+const getRelease = async (__, { id }, context) => {
     const { username } = context;
 
     const discogsRelease = await fetchFromDiscogs({
@@ -224,7 +237,7 @@ const getRelease = async (__, { id, instanceId }, context) => {
 
     if (release) {
         const user = await User.findOne({ username });
-        const userCopy = await UserCopy.findOne({ instanceId, user });
+        // const userCopy = await UserCopy.findOne({ user });
         const userRating = await Rating.findOne({ user });
 
         const { artist, title, ratingsCount, ratingAvg, quietnessAvg, flatnessAvg, clarityAvg } =
@@ -240,7 +253,6 @@ const getRelease = async (__, { id, instanceId }, context) => {
                 quietnessAvg,
                 flatnessAvg,
                 clarityAvg,
-                userCopy,
                 currentUserRating: userRating || null,
                 vinylRatings: release.vinylRatings || null,
             },
@@ -368,6 +380,25 @@ const addToCollection = async (__, { releaseId, folderId }, context) => {
     }
 };
 
+const addToWantList = async (__, { releaseId, notes }, context) => {
+    const { username, Authorization } = context;
+
+    try {
+        const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/wants/${releaseId}`, {
+            method: 'PUT',
+            headers: { Authorization, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes }),
+        });
+
+        const result = await response.json();
+
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`addToWantList: ${error}`);
+    }
+};
+
 const removeFromCollection = async (__, { folderId, releaseId, instanceId }, context) => {
     const { username, Authorization } = context;
 
@@ -381,23 +412,23 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
             }
         );
 
-        const user = await User.findOne({ username });
-        const userCopy = await UserCopy.findOne({ instanceId, user });
-        const release = await Release.findOne({ releaseId });
+        // const user = await User.findOne({ username });
+        // const userCopy = await UserCopy.findOne({ instanceId, user });
+        // const release = await Release.findOne({ releaseId });
 
-        if (!release) {
-            return { success: response.status === 204 };
-        }
+        // if (!release) {
+        //     return { success: response.status === 204 };
+        // }
 
-        if (userCopy) {
-            await UserCopy.deleteOne({
-                instanceId,
-                releaseId,
-                washedOn: '',
-                release,
-                user,
-            });
-        }
+        // if (userCopy) {
+        //     await UserCopy.deleteOne({
+        //         instanceId,
+        //         releaseId,
+        //         washedOn: '',
+        //         release,
+        //         user,
+        //     });
+        // }
 
         return { success: response.status === 204 };
     } catch (error) {
@@ -406,7 +437,7 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
     }
 };
 
-const addRelease = async (__, { releaseId, instanceId, title, artist }, context) => {
+const addRelease = async (__, { releaseId, title, artist }, context) => {
     // const { username } = context;
 
     // const user = await User.findOne({ username });
@@ -479,32 +510,32 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
     return null;
 };
 
-const addWashedOn = async (__, { instanceId, washedOn }, context) => {
-    const { username } = context;
+// const addWashedOn = async (__, { instanceId, washedOn }, context) => {
+//     const { username } = context;
 
-    try {
-        const user = await User.findOne({ username });
-        let userCopy = await UserCopy.findOne({ instanceId, user });
+//     try {
+//         const user = await User.findOne({ username });
+//         let userCopy = await UserCopy.findOne({ instanceId, user });
 
-        if (!userCopy) {
-            userCopy = await UserCopy.create({
-                instanceId,
-                washedOn: '',
-                user,
-            });
-        }
+//         if (!userCopy) {
+//             userCopy = await UserCopy.create({
+//                 instanceId,
+//                 washedOn: '',
+//                 user,
+//             });
+//         }
 
-        userCopy.washedOn = washedOn;
+//         userCopy.washedOn = washedOn;
 
-        await userCopy.save();
+//         await userCopy.save();
 
-        return userCopy;
-    } catch (error) {
-        console.warn(error);
-    }
+//         return userCopy;
+//     } catch (error) {
+//         console.warn(error);
+//     }
 
-    return null;
-};
+//     return null;
+// };
 
 const updateCustomField = async (__, { values, releaseId, folderId, instanceId }, context) => {
     const { username, Authorization } = context;
@@ -597,6 +628,7 @@ const queries = {
     getCustomFields,
     getCollection,
     getWantList,
+    getIsInWantList,
     getRelease,
     getMasterRelease,
     getMasterReleaseVersions,
@@ -611,10 +643,11 @@ const mutations = {
     addToCollection,
     removeFromCollection,
     addRating,
-    addWashedOn,
+    // addWashedOn,
     updateCustomField,
     updateInstanceFolder,
     updateUser,
+    addToWantList,
 };
 
 export const resolvers = {
