@@ -1,26 +1,32 @@
-type Pagination {
-    items: Int!
-    page: Int!
-    pages: Int!
-    per_page: Int!
+input CustomFieldValuesInput {
+    fieldId: Int!
+    value: String!
+}
+
+input Ratings {
+    quietness: Float!
+    flatness: Float!
+    clarity: Float!
+}
+
+scalar StringOrInt
+
+union SearchResults = ArtistSearchResult | ReleasesSearchResult | MasterSearchResult
+
+type AddToCollectionResponse {
+    instance_id: String!
+    folder_id: ID!
+    id: ID!
+}
+
+type AddToWantListResponse {
+    id: ID
+    notes: String
+    rating: Int
 }
 
 type Artist {
     name: String
-}
-
-type Label {
-    name: String
-}
-
-type Company {
-    name: String
-    entity_type_name: String
-}
-
-type SeriesEntry {
-    name: String
-    entity_type_name: String
 }
 
 type ArtistMember {
@@ -38,13 +44,19 @@ type ArtistPage {
     members: [ArtistMember]
 }
 
-scalar StringOrInt
+type ArtistSearch {
+    id: ID!
+    type: String!
+    user_data: UserData!
+    title: String!
+    thumb: String
+    cover_image: String
+}
 
-type Format {
-    qty: String
-    text: String
-    name: String
-    descriptions: [String]
+type ArtistSearchResult {
+    isArtists: Boolean
+    pagination: Pagination!
+    results: [ArtistSearch]!
 }
 
 type BasicInformation {
@@ -64,27 +76,9 @@ type BasicInformation {
     type: String
 }
 
-type ArtistSearch {
-    id: ID!
-    type: String!
-    user_data: UserData!
-    title: String!
-    thumb: String
-    cover_image: String
-}
-
-type InstanceNotes {
-    field_id: Int
-    value: String
-}
-
-type Releases {
-    id: ID!
-    instance_id: ID
-    notes: [InstanceNotes]
-    date_added: String
-    rating: Float
-    basic_information: BasicInformation!
+type Collection {
+    pagination: Pagination!
+    releases: [CollectionInstance]!
 }
 
 type CollectionInstance {
@@ -97,57 +91,23 @@ type CollectionInstance {
     basic_information: BasicInformation!
 }
 
-type Collection {
-    pagination: Pagination!
-    releases: [CollectionInstance]!
+type Company {
+    name: String
+    entity_type_name: String
 }
 
-type IsInCollectionResponse {
-    isInCollection: Boolean!
-    pagination: Pagination!
-    releases: [CollectionInstance]!
-}
-
-type ReleasesSearchResult {
-    isReleases: Boolean
-    pagination: Pagination!
-    results: [Releases]!
-}
-
-type ArtistSearchResult {
-    isArtists: Boolean
-    pagination: Pagination!
-    results: [ArtistSearch]!
-}
-
-type MasterSearchResult {
-    isMasters: Boolean
-    pagination: Pagination!
-    results: [Releases]!
-}
-
-union SearchResults = ArtistSearchResult | ReleasesSearchResult | MasterSearchResult
-
-type UserData {
-    in_collection: Boolean
-    in_wantlist: Boolean
-}
-
-type TrackList {
-    position: String!
-    title: String!
-    duration: String!
-}
-
-type Identifier {
+type CustomField {
+    position: Int!
+    id: Int!
+    name: String!
     type: String!
-    value: String!
-    description: String
+    options: [String]
+    public: Boolean!
+    lines: Int
 }
 
-type DiscogsRating {
-    count: Int!
-    average: Float!
+type CustomFieldsResponse {
+    fields: [CustomField]
 }
 
 type DiscogsCommunity {
@@ -156,7 +116,17 @@ type DiscogsCommunity {
     rating: DiscogsRating!
 }
 
-type Release {
+type DiscogsMasterVersions {
+    pagination: Pagination
+    versions: [Releases]
+}
+
+type DiscogsRating {
+    count: Int!
+    average: Float!
+}
+
+type DiscogsRelease {
     uri: String!
     id: ID!
     master_id: ID!
@@ -179,6 +149,88 @@ type Release {
     labels: [Label]!
     series: [SeriesEntry]!
     companies: [Company]!
+    reviews: DiscogsReviews!
+}
+
+type DiscogsReview {
+    id: Int!
+    review_plaintext: String!
+    date_added: String!
+    reply_to: Int
+    num_replies: Int!
+    user: DiscogsUser!
+}
+
+type DiscogsReviews {
+    pagination: Pagination!
+    results: [DiscogsReview]!
+}
+
+type DiscogsStats {
+    user: UserData!
+    community: UserData!
+}
+
+type DiscogsUser {
+    id: Int!
+    username: String!
+    avatar_url: String!
+}
+
+type DiscogsVersions {
+    id: ID!
+    stats: DiscogsStats
+    thumb: String
+    format: String
+    country: String
+    title: String
+    label: String
+    released: String
+}
+
+type Folder {
+    id: Int!
+    name: String!
+    count: Int!
+}
+
+type Format {
+    qty: String
+    text: String
+    name: String
+    descriptions: [String]
+}
+
+type Identifier {
+    type: String!
+    value: String!
+    description: String
+}
+
+type Image {
+    resource_url: String!
+    height: Int
+    width: Int
+}
+
+type InstanceNotes {
+    field_id: Int
+    value: String
+}
+
+type IsInCollectionResponse {
+    isInCollection: Boolean!
+    pagination: Pagination!
+    releases: [CollectionInstance]!
+}
+
+type IsInWantListResponse {
+    isInWantList: Boolean!
+    id: Int!
+}
+
+type Label {
+    name: String
 }
 
 type MasterRelease {
@@ -197,56 +249,77 @@ type MasterRelease {
     most_recent_release: Int
 }
 
-type DiscogsStats {
-    user: UserData!
-    community: UserData!
+type MasterSearchResult {
+    isMasters: Boolean
+    pagination: Pagination!
+    results: [Releases]!
 }
 
-type DiscogsVersions {
-    id: ID!
-    stats: DiscogsStats
-    thumb: String
-    format: String
-    country: String
-    title: String
-    label: String
-    released: String
-}
-
-type DiscogsMasterVersions {
-    pagination: Pagination
-    versions: [Releases]
-}
-
-type WantListNotFound {
-    message: String!
-}
-
-type WantListRelease {
-    rating: Int
+type MutationSuccessResponse {
+    success: Boolean
     id: Int
+}
+
+type Pagination {
+    items: Int!
+    page: Int!
+    pages: Int!
+    per_page: Int!
+}
+
+type Releases {
+    id: ID!
+    instance_id: ID
+    notes: [InstanceNotes]
+    date_added: String
+    rating: Float
     basic_information: BasicInformation!
 }
 
-type IsInWantListResponse {
-    isInWantList: Boolean!
-}
-
-type Image {
-    resource_url: String!
-    height: Int
-    width: Int
-}
-
-type Wants {
+type ReleasesSearchResult {
+    isReleases: Boolean
     pagination: Pagination!
-    wants: [WantListRelease]
+    results: [Releases]!
 }
 
-input Ratings {
-    quietness: Float!
-    flatness: Float!
-    clarity: Float!
+type SeriesEntry {
+    name: String
+    entity_type_name: String
+}
+
+type TrackList {
+    position: String!
+    title: String!
+    duration: String!
+}
+
+type UserData {
+    in_collection: Boolean
+    in_wantlist: Boolean
+}
+
+input UserInput {
+    username: String!
+    password: String!
+}
+
+type User {
+    _id: ID
+    username: String!
+    token: String!
+    avatarUrl: String!
+    discogsUserId: Int!
+    releasesRated: Int!
+    vinylRatings: [VRRating]
+    washedOnField: String
+}
+
+type UserCopy {
+    instanceId: Int
+    releaseId: Int
+    washedOn: String
+    username: String
+    notes: [InstanceNotes]
 }
 
 type VRRating {
@@ -260,14 +333,6 @@ type VRRating {
     release: String
     updatedAt: String
     user: User
-}
-
-type UserCopy {
-    instanceId: Int
-    releaseId: Int
-    washedOn: String
-    username: String
-    notes: [InstanceNotes]
 }
 
 type VRRelease {
@@ -284,51 +349,19 @@ type VRRelease {
     vinylRatings: [VRRating]
 }
 
-type User {
-    _id: ID
-    username: String!
-    token: String!
-    avatarUrl: String!
-    discogsUserId: Int!
-    releasesRated: Int!
-    vinylRatings: [VRRating]
-    washedOnField: String
+type WantListNotFound {
+    message: String!
 }
 
-type Folder {
-    id: Int!
-    name: String!
-    count: Int!
-}
-
-type CustomField {
-    position: Int!
-    id: Int!
-    name: String!
-    type: String!
-    options: [String]
-    public: Boolean!
-    lines: Int
-}
-type CustomFieldsResponse {
-    fields: [CustomField]
-}
-
-type AddToCollectionResponse {
-    instance_id: String!
-    folder_id: ID!
-    id: ID!
-}
-
-type AddToWantListResponse {
-    id: ID
-    notes: String
+type WantListRelease {
     rating: Int
-    basic_information: BasicInformation
+    id: Int
+    basic_information: BasicInformation!
 }
 
-type MutationSuccessResponse {
-    success: Boolean
+type Wants {
+    pagination: Pagination!
+    wants: [WantListRelease]
 }
 
 type Query {
@@ -352,7 +385,7 @@ type Query {
         limit: Int
     ): Wants!
     getIsInWantList(releaseId: Int!): IsInWantListResponse!
-    getRelease(id: Int!): Release!
+    getRelease(id: Int!): DiscogsRelease!
     getMasterRelease(id: Int!): MasterRelease!
     getMasterReleaseVersions(
         master_id: ID
@@ -383,11 +416,6 @@ type Query {
 #     value: String
 # }
 
-input CustomFieldValuesInput {
-    fieldId: Int!
-    value: String!
-}
-
 type Mutation {
     addRelease(
         releaseId: Int!
@@ -402,6 +430,7 @@ type Mutation {
         releaseId: Int!
         instanceId: Int!
     ): MutationSuccessResponse!
+    removeFromWantList(releaseId: Int!): MutationSuccessResponse!
     addRating(
         releaseId: Int!
         quietness: Int!

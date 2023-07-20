@@ -60,7 +60,7 @@ app.use(
     bodyParser.json(),
     expressMiddleware(server, {
         // @ts-ignore
-        context: ({ req }) => {
+        context: async ({ req }) => {
             const auth = req?.headers?.authorization ?? '';
 
             if (auth) {

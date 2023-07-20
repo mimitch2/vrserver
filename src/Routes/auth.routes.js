@@ -33,6 +33,7 @@ router.get('/auth', async (req, res, next) => {
         process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging'
             ? `https://${req.hostname}`
             : `http://${req.hostname}:${process.env.PORT || 8080}`;
+    console.log('🚀 ~ file: auth.routes.js:33 ~ router.get ~ callbackUrl:', callbackUrl);
 
     try {
         const tokenResponse = await fetch(`${process.env.DISCOGS_ENDPOINT}/oauth/request_token`, {

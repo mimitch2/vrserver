@@ -217,16 +217,24 @@ const getIsInWantList = async (__, { releaseId }, context) => {
 
     return {
         isInWantList: !result?.message,
+        id: releaseId,
     };
 };
 
 const getRelease = async (__, { id }, context) => {
     const { username } = context;
 
-    const discogsRelease = await fetchFromDiscogs({
+    const dcRelease = fetchFromDiscogs({
         url: `${DISCOGS_ENDPOINT}/releases/${id}`,
         context,
     });
+
+    const dcReviews = fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/releases/${id}/reviews`,
+        context,
+    });
+
+    const [discogsRelease, discogsReviews] = await Promise.all([dcRelease, dcReviews]);
 
     const release = await Release.findOne({ releaseId: id }).populate({
         path: 'vinylRatings',
@@ -234,6 +242,11 @@ const getRelease = async (__, { id }, context) => {
             path: 'user',
         },
     });
+
+    const targetRelease = {
+        ...discogsRelease,
+        reviews: discogsReviews ?? null,
+    };
 
     if (release) {
         const user = await User.findOne({ username });
@@ -244,7 +257,7 @@ const getRelease = async (__, { id }, context) => {
             release;
 
         return {
-            ...discogsRelease,
+            ...targetRelease,
             vinylRatingsRelease: {
                 artist,
                 title,
@@ -259,7 +272,7 @@ const getRelease = async (__, { id }, context) => {
         };
     }
 
-    return { ...discogsRelease, vinylRatingsRelease: null };
+    return { ...targetRelease, vinylRatingsRelease: null };
 };
 
 const getMasterRelease = async (__, { id }, context) => {
@@ -430,10 +443,26 @@ const removeFromCollection = async (__, { folderId, releaseId, instanceId }, con
         //     });
         // }
 
-        return { success: response.status === 204 };
+        return { success: response.status === 204, id: releaseId };
     } catch (error) {
         console.error(error);
         throw new GraphQLError(`removeFromCollection: ${error}`);
+    }
+};
+
+const removeFromWantList = async (__, { releaseId }, context) => {
+    const { username, Authorization } = context;
+
+    try {
+        const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/wants/${releaseId}`, {
+            method: 'DELETE',
+            headers: { Authorization },
+        });
+
+        return { success: response.status === 204, id: releaseId };
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLError(`remnoveFromWantList: ${error}`);
     }
 };
 
@@ -642,6 +671,7 @@ const mutations = {
     addRelease,
     addToCollection,
     removeFromCollection,
+    removeFromWantList,
     addRating,
     // addWashedOn,
     updateCustomField,

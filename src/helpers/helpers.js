@@ -66,10 +66,11 @@ export const getDiscogsHeadersAndUsername = ({ auth }) => {
     const token = jwt.verify(auth.token, process.env.JWT_SECRET);
     const secret = jwt.verify(auth.secret, process.env.JWT_SECRET);
     const username = jwt.verify(auth.username, process.env.JWT_SECRET);
+    const now = Date.now();
 
     return {
         username,
-        Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${token}", oauth_signature="${consumerSecret}&${secret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`,
+        Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${now}", oauth_token="${token}", oauth_signature="${consumerSecret}&${secret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${now}"`,
     };
 };
 
