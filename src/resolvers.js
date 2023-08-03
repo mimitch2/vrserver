@@ -85,7 +85,10 @@ const getCollection = async (__, { folder, page, per_page, sort, sort_order }, c
             })
         )) ?? [];
 
-    return { pagination: result.pagination, releases: formatted };
+    return {
+        pagination: result.pagination,
+        releases: formatted,
+    };
 };
 
 const getSearch = async (
@@ -170,7 +173,7 @@ const getWantList = async (__, { page, per_page, sort, sort_order }, context) =>
     const queryParams = generateQueryParams(
         isCustomWantListSorted
             ? {
-                  params: { page, per_page: 500, sort: 'added', sort_order },
+                  params: { page, per_page, sort: 'added', sort_order },
               }
             : {
                   params: {
@@ -224,17 +227,11 @@ const getIsInWantList = async (__, { releaseId }, context) => {
 const getRelease = async (__, { id }, context) => {
     const { username } = context;
 
-    const dcRelease = fetchFromDiscogs({
+    const discogsRelease = await fetchFromDiscogs({
         url: `${DISCOGS_ENDPOINT}/releases/${id}`,
         context,
     });
-
-    const dcReviews = fetchFromDiscogs({
-        url: `${DISCOGS_ENDPOINT}/releases/${id}/reviews`,
-        context,
-    });
-
-    const [discogsRelease, discogsReviews] = await Promise.all([dcRelease, dcReviews]);
+    console.log('🚀 ~ file: resolvers.js:234 ~ getRelease ~ discogsRelease:', discogsRelease);
 
     const release = await Release.findOne({ releaseId: id }).populate({
         path: 'vinylRatings',
@@ -242,11 +239,6 @@ const getRelease = async (__, { id }, context) => {
             path: 'user',
         },
     });
-
-    const targetRelease = {
-        ...discogsRelease,
-        reviews: discogsReviews ?? null,
-    };
 
     if (release) {
         const user = await User.findOne({ username });
@@ -257,7 +249,7 @@ const getRelease = async (__, { id }, context) => {
             release;
 
         return {
-            ...targetRelease,
+            ...discogsRelease,
             vinylRatingsRelease: {
                 artist,
                 title,
@@ -272,7 +264,21 @@ const getRelease = async (__, { id }, context) => {
         };
     }
 
-    return { ...targetRelease, vinylRatingsRelease: null };
+    return { ...discogsRelease, vinylRatingsRelease: null };
+};
+
+const getReleaseReviews = async (__, { releaseId, page, per_page }, context) => {
+    const queryParams = generateQueryParams({
+        page,
+        per_page,
+    });
+
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/releases/${releaseId}/reviews${queryParams}`,
+        context,
+    });
+
+    return result;
 };
 
 const getMasterRelease = async (__, { id }, context) => {
@@ -332,17 +338,13 @@ const getMasterReleaseVersions = async (
 };
 
 const getReleaseInCollection = async (__, { id }, context) => {
-    const { username, Authorization } = context;
+    const { username } = context;
 
     try {
-        const response = await fetch(
-            `${DISCOGS_ENDPOINT}/users/${username}/collection/releases/${id}`,
-            {
-                headers: { Authorization },
-            }
-        );
-
-        const result = await response.json();
+        const result = await fetchFromDiscogs({
+            url: `${DISCOGS_ENDPOINT}/users/${username}/collection/releases/${id}`,
+            context,
+        });
 
         return {
             isInCollection: !!result?.releases?.length ?? false,
@@ -356,14 +358,11 @@ const getReleaseInCollection = async (__, { id }, context) => {
 };
 
 const getArtist = async (__, { id }, context) => {
-    const { Authorization } = context;
-
     try {
-        const response = await fetch(`${DISCOGS_ENDPOINT}/artists/${id}`, {
-            headers: { Authorization },
+        const result = await fetchFromDiscogs({
+            url: `${DISCOGS_ENDPOINT}/artists/${id}`,
+            context,
         });
-
-        const result = await response.json();
 
         return result;
     } catch (error) {
@@ -373,37 +372,33 @@ const getArtist = async (__, { id }, context) => {
 };
 
 const addToCollection = async (__, { releaseId, folderId }, context) => {
-    const { username, Authorization } = context;
+    const { username } = context;
 
     try {
-        const response = await fetch(
-            `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}`,
-            {
-                method: 'POST',
-                headers: { Authorization },
-            }
-        );
-
-        const result = await response.json();
+        const result = await fetchFromDiscogs({
+            method: 'POST',
+            url: `${DISCOGS_ENDPOINT}/users/${username}/collection/folders/${folderId}/releases/${releaseId}`,
+            context,
+        });
 
         return result;
     } catch (error) {
         console.error(error);
-        throw new GraphQLError(`getSearch: ${error}`);
+        throw new GraphQLError(`addToCollection: ${error}`);
     }
 };
 
 const addToWantList = async (__, { releaseId, notes }, context) => {
-    const { username, Authorization } = context;
+    const { username } = context;
 
     try {
-        const response = await fetch(`${DISCOGS_ENDPOINT}/users/${username}/wants/${releaseId}`, {
+        const result = await fetchFromDiscogs({
+            url: `${DISCOGS_ENDPOINT}/users/${username}/wants/${releaseId}`,
             method: 'PUT',
-            headers: { Authorization, 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ notes }),
+            context,
         });
-
-        const result = await response.json();
 
         return result;
     } catch (error) {
@@ -466,40 +461,49 @@ const removeFromWantList = async (__, { releaseId }, context) => {
     }
 };
 
-const addRelease = async (__, { releaseId, title, artist }, context) => {
-    // const { username } = context;
+// const addRelease = async (__, { releaseId, title, artist }, context) => {
+//     // const { username } = context;
 
-    // const user = await User.findOne({ username });
+//     // const user = await User.findOne({ username });
 
-    // let userCopy = await UserCopy.findOne({ instanceId, user });
-    let release = await Release.findOne({ releaseId });
+//     // let userCopy = await UserCopy.findOne({ instanceId, user });
+//     let release = await Release.findOne({ releaseId });
 
-    if (!release) {
-        release = await Release.create({ releaseId, title, artist });
-    }
+//     if (!release) {
+//         release = await Release.create({ releaseId, title, artist });
+//     }
 
-    // if (!userCopy) {
-    //     userCopy = await UserCopy.create({
-    //         instanceId,
-    //         releaseId,
-    //         washedOn: '',
-    //         release,
-    //         user,
-    //     });
-    // }
+//     // if (!userCopy) {
+//     //     userCopy = await UserCopy.create({
+//     //         instanceId,
+//     //         releaseId,
+//     //         washedOn: '',
+//     //         release,
+//     //         user,
+//     //     });
+//     // }
 
-    return release;
-};
+//     return release;
+// };
 
-const addRating = async (__, { releaseId, clarity, quietness, flatness, notes }, context) => {
+const addRating = async (
+    __,
+    { releaseId, clarity, quietness, flatness, notes, title, artist },
+    context
+) => {
     const ratings = { clarity, quietness, flatness };
     const { username } = context;
 
     try {
         const user = await User.findOne({ username });
-        const release = await Release.findOne({ releaseId });
+        const userRating = await Rating.findOne({ user });
+        let release = await Release.findOne({ releaseId });
         let rating = await Rating.findOne({ user, release });
         const ratingExists = !!rating;
+
+        if (!release) {
+            release = await Release.create({ releaseId, title, artist });
+        }
 
         if (ratingExists) {
             Object.entries(ratings).forEach(([key, value]) => {
@@ -523,6 +527,13 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
             await user.save();
         }
 
+        await release.populate({
+            path: 'vinylRatings',
+            populate: {
+                path: 'user',
+            },
+        });
+
         await updateRelease({
             ratings,
             notes,
@@ -530,7 +541,7 @@ const addRating = async (__, { releaseId, clarity, quietness, flatness, notes },
             isUpdating: ratingExists,
         });
 
-        return rating;
+        return release;
     } catch (error) {
         const errorMessage = `Failed to create rating: ${error}`;
         console.error(errorMessage);
@@ -659,6 +670,7 @@ const queries = {
     getWantList,
     getIsInWantList,
     getRelease,
+    getReleaseReviews,
     getMasterRelease,
     getMasterReleaseVersions,
     getReleaseInCollection,
@@ -668,7 +680,7 @@ const queries = {
 };
 
 const mutations = {
-    addRelease,
+    // addRelease,
     addToCollection,
     removeFromCollection,
     removeFromWantList,

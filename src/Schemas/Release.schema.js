@@ -59,11 +59,11 @@ releaseSchema.virtual('currentUserRating', {
     foreignField: 'release',
 });
 
-releaseSchema.virtual('userCopy', {
-    ref: 'UserCopy',
-    localField: '_id',
-    foreignField: 'release',
-});
+// releaseSchema.virtual('userCopy', {
+//     ref: 'UserCopy',
+//     localField: '_id',
+//     foreignField: 'release',
+// });
 
 releaseSchema.set('toObject', { virtuals: true });
 releaseSchema.set('toJSON', { virtuals: true });

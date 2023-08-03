@@ -13,12 +13,6 @@ scalar StringOrInt
 
 union SearchResults = ArtistSearchResult | ReleasesSearchResult | MasterSearchResult
 
-type AddToCollectionResponse {
-    instance_id: String!
-    folder_id: ID!
-    id: ID!
-}
-
 type AddToWantListResponse {
     id: ID
     notes: String
@@ -149,7 +143,6 @@ type DiscogsRelease {
     labels: [Label]!
     series: [SeriesEntry]!
     companies: [Company]!
-    reviews: DiscogsReviews!
 }
 
 type DiscogsReview {
@@ -161,7 +154,7 @@ type DiscogsReview {
     user: DiscogsUser!
 }
 
-type DiscogsReviews {
+type DiscogsReleaseReviews {
     pagination: Pagination!
     results: [DiscogsReview]!
 }
@@ -174,7 +167,7 @@ type DiscogsStats {
 type DiscogsUser {
     id: Int!
     username: String!
-    avatar_url: String!
+    avatar_url: String
 }
 
 type DiscogsVersions {
@@ -344,7 +337,6 @@ type VRRelease {
     clarityAvg: Float!
     ratingAvg: Float!
     ratingsCount: Int!
-    userCopy: UserCopy
     currentUserRating: VRRating
     vinylRatings: [VRRating]
 }
@@ -386,6 +378,7 @@ type Query {
     ): Wants!
     getIsInWantList(releaseId: Int!): IsInWantListResponse!
     getRelease(id: Int!): DiscogsRelease!
+    getReleaseReviews(releaseId: Int!, page: Int!, per_page: Int!): DiscogsReleaseReviews!
     getMasterRelease(id: Int!): MasterRelease!
     getMasterReleaseVersions(
         master_id: ID
@@ -417,13 +410,12 @@ type Query {
 # }
 
 type Mutation {
-    addRelease(
-        releaseId: Int!
-        # instanceId: Int!
-        title: String!
-        artist: String! # notes: [NotesInput]
-    ): VRRelease!
-    addToCollection(releaseId: Int!, folderId: Int!): AddToCollectionResponse
+    # addRelease(
+    #     releaseId: Int!
+    #     title: String!
+    #     artist: String! # notes: [NotesInput]
+    # ): VRRelease!
+    addToCollection(releaseId: Int!, folderId: Int!): CollectionInstance
     addToWantList(releaseId: Int!, notes: String): AddToWantListResponse
     removeFromCollection(
         folderId: Int!
@@ -437,7 +429,9 @@ type Mutation {
         clarity: Int!
         flatness: Int!
         notes: String
-    ): VRRating
+        title: String!
+        artist: String!
+    ): VRRelease
     # addWashedOn(
     #     instanceId: Int!
     #     washedOn: String! # title: String! # artist: String!

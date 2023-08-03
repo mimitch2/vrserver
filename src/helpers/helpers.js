@@ -16,18 +16,30 @@ export const throwError = ({ error, discogsError }) => {
     throw new GraphQLError(errorString);
 };
 
-export const fetchFromDiscogs = async ({ method = 'GET', url, context, headers = {} }) => {
+export const fetchFromDiscogs = async ({
+    method = 'GET',
+    url,
+    context,
+    headers = {},
+    body = null,
+}) => {
     const { Authorization } = context;
     let discogsError = false;
 
+    const options = {
+        method,
+        headers: {
+            Authorization,
+            ...headers,
+        },
+    };
+
+    if (body) {
+        options.body = body;
+    }
+
     try {
-        const response = await fetch(`${url}`, {
-            method,
-            headers: {
-                Authorization,
-                ...headers,
-            },
-        });
+        const response = await fetch(`${url}`, options);
 
         const result = await response.json();
 
