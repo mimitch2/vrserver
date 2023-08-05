@@ -231,7 +231,6 @@ const getRelease = async (__, { id }, context) => {
         url: `${DISCOGS_ENDPOINT}/releases/${id}`,
         context,
     });
-    console.log('🚀 ~ file: resolvers.js:234 ~ getRelease ~ discogsRelease:', discogsRelease);
 
     const release = await Release.findOne({ releaseId: id }).populate({
         path: 'vinylRatings',
@@ -269,12 +268,24 @@ const getRelease = async (__, { id }, context) => {
 
 const getReleaseReviews = async (__, { releaseId, page, per_page }, context) => {
     const queryParams = generateQueryParams({
-        page,
-        per_page,
+        params: { page, per_page },
     });
 
     const result = await fetchFromDiscogs({
         url: `${DISCOGS_ENDPOINT}/releases/${releaseId}/reviews${queryParams}`,
+        context,
+    });
+
+    return result;
+};
+
+const getReviewReplies = async (__, { reviewId, page }, context) => {
+    const queryParams = generateQueryParams({
+        params: { page },
+    });
+
+    const result = await fetchFromDiscogs({
+        url: `${DISCOGS_ENDPOINT}/reviews/${reviewId}/replies${queryParams}`,
         context,
     });
 
@@ -671,6 +682,7 @@ const queries = {
     getIsInWantList,
     getRelease,
     getReleaseReviews,
+    getReviewReplies,
     getMasterRelease,
     getMasterReleaseVersions,
     getReleaseInCollection,

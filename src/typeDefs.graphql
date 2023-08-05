@@ -379,6 +379,8 @@ type Query {
     getIsInWantList(releaseId: Int!): IsInWantListResponse!
     getRelease(id: Int!): DiscogsRelease!
     getReleaseReviews(releaseId: Int!, page: Int!, per_page: Int!): DiscogsReleaseReviews!
+    # No per_page for replies as it has not affect on the response - stuck at 50
+    getReviewReplies(reviewId: Int!, page: Int!): DiscogsReleaseReviews!
     getMasterRelease(id: Int!): MasterRelease!
     getMasterReleaseVersions(
         master_id: ID
