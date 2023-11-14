@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import User from '../Schemas/User.schema.js';
+import { getTimeInSeconds } from '../helpers/helpers.js';
 
 const router = express.Router();
 dotenv.config();
@@ -33,14 +34,13 @@ router.get('/auth', async (req, res, next) => {
         process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging'
             ? `https://${req.hostname}`
             : `http://${req.hostname}:${process.env.PORT || 8080}`;
-    console.log('🚀 ~ file: auth.routes.js:33 ~ router.get ~ callbackUrl:', callbackUrl);
 
     try {
         const tokenResponse = await fetch(`${process.env.DISCOGS_ENDPOINT}/oauth/request_token`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}",oauth_nonce="${Date.now()}",oauth_version="1.0",oauth_signature="${consumerSecret}&", oauth_callback="${callbackUrl}/return"`,
+                Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${getTimeInSeconds()}",oauth_nonce="${getTimeInSeconds()}",oauth_version="1.0",oauth_signature="${consumerSecret}&", oauth_callback="${callbackUrl}/return"`,
             },
         });
 
@@ -62,7 +62,7 @@ router.get('/return', async (req, res, next) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_nonce="${Date.now()}",oauth_token="${discogsAuthRequestToken}", oauth_signature=${consumerSecret}&${discogsAuthTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}",oauth_verifier="${oAuthVerifier}"`,
+                Authorization: `OAuth oauth_consumer_key="${consumerKey}",oauth_nonce="${getTimeInSeconds()}",oauth_token="${discogsAuthRequestToken}", oauth_signature=${consumerSecret}&${discogsAuthTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${getTimeInSeconds()}",oauth_verifier="${oAuthVerifier}"`,
             },
         });
 
@@ -74,7 +74,7 @@ router.get('/return', async (req, res, next) => {
         const identityResponse = await fetch('https://api.discogs.com/oauth/identity', {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`,
+                Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${getTimeInSeconds()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${getTimeInSeconds()}"`,
             },
         });
 
@@ -84,7 +84,7 @@ router.get('/return', async (req, res, next) => {
         const userResponse = await fetch(`https://api.discogs.com/users/${username}`, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${Date.now()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Date.now()}"`,
+                Authorization: `OAuth oauth_consumer_key="${consumerKey}", oauth_nonce="${getTimeInSeconds()}", oauth_token="${discogsAccessToken}", oauth_signature="${consumerSecret}&${discogsAccessTokenSecret}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${getTimeInSeconds()}"`,
             },
         });
 

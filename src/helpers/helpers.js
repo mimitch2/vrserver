@@ -8,6 +8,8 @@ import fetch from 'node-fetch';
 
 import Rating from '../Schemas/Rating.schema.js';
 
+export const getTimeInSeconds = () => Math.floor(Date.now() / 1000);
+
 export const throwError = ({ error, discogsError }) => {
     const errorString = `getCollection: ${error} ~ discogsError: ${discogsError}`;
 
@@ -78,7 +80,7 @@ export const getDiscogsHeadersAndUsername = ({ auth }) => {
     const token = jwt.verify(auth.token, process.env.JWT_SECRET);
     const secret = jwt.verify(auth.secret, process.env.JWT_SECRET);
     const username = jwt.verify(auth.username, process.env.JWT_SECRET);
-    const now = Date.now();
+    const now = getTimeInSeconds();
 
     return {
         username,
