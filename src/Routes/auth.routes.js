@@ -135,7 +135,7 @@ router.get('/return', async (req, res, next) => {
 
             const appUri =
                 process.env.NODE_ENV === 'development'
-                    ? 'exp://192.168.4.89:19000/--'
+                    ? 'exp://192.168.4.137:19000/--'
                     : 'vinylratings://';
             // const appUri = 'vinylratings://';
             res.redirect(`${appUri}/home?auth=${cookie}`);
