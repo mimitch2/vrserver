@@ -657,6 +657,24 @@ const updateUser = async (__, { key, value }, context) => {
     }
 };
 
+const updateWashedOnField = async (__, { value }, context) => {
+    const { username } = context;
+
+    try {
+        const user = await User.findOne({ username });
+
+        if (user) {
+            await user.updateOne({ username, washedOnField: value });
+            return user;
+        }
+
+        throw new Error('Cannot updated washedOnField: user not found');
+    } catch (error) {
+        console.error(error);
+        throw new Error(`updateWashedOnFiledName: ${error}`);
+    }
+};
+
 const getUser = async (__, { auth }) => {
     if (!auth) {
         return null;
@@ -701,6 +719,7 @@ const mutations = {
     updateCustomField,
     updateInstanceFolder,
     updateUser,
+    updateWashedOnField,
     addToWantList,
 };
 

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { customFieldSchema } from './CustomField.schema.js';
 
 const { Schema, model } = mongoose;
 
@@ -42,9 +43,7 @@ const userSchema = new Schema(
             type: Number,
             required: true,
         },
-        washedOnField: {
-            type: String,
-        },
+        washedOnField: { type: customFieldSchema, required: false, default: null },
     },
     { timestamps: true }
 );
