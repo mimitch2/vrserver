@@ -670,6 +670,7 @@ const getUser = async (__, { auth }) => {
             path: 'user',
         },
     });
+    console.log("🚀 ~ file: resolvers.js:673 ~ user ~ user:", user)
 
     return user;
 };

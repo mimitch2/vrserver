@@ -43,7 +43,8 @@ const userSchema = new Schema(
             required: true,
         },
         washedOnField: {
-            type: String,
+            type: Schema.Types.ObjectId,
+            ref: 'CustomField',
         },
     },
     { timestamps: true }
