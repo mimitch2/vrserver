@@ -411,6 +411,16 @@ type Query {
 #     value: String
 # }
 
+input UpdateWashedOnFieldInput {
+    position: Int!
+    id: Int!
+    name: String!
+    type: String!
+    options: [String]
+    public: Boolean!
+    lines: Int
+}
+
 type Mutation {
     # addRelease(
     #     releaseId: Int!
@@ -451,4 +461,5 @@ type Mutation {
         newFolderId: Int!
     ): MutationSuccessResponse
     updateUser(key: String, value: String): User
+    updateWashedOnField(value: UpdateWashedOnFieldInput): User
 }
