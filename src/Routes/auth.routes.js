@@ -115,7 +115,6 @@ router.get('/return', async (req, res, next) => {
                         discogsUserId,
                         releasesRated: 0,
                         avatarUrl: userData?.avatar_url || null,
-                        washedOnField: '',
                     });
                 } catch (error) {
                     const errorMessage = `Failed to create new user: ${error}`;
@@ -141,7 +140,8 @@ router.get('/return', async (req, res, next) => {
             res.redirect(`${appUri}/home?auth=${cookie}`);
         }
     } catch (error) {
-        next(res.status(500).send('Internal Server Error'));
+        console.log('🚀 ~ file: auth.routes.js:143 ~ router.get ~ error:', error);
+        next(res.status(500).send('Internal Server Error!!!'));
     }
 });
 

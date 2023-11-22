@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
-const { Schema, model } = mongoose;
+const { Schema } = mongoose;
 
-const customFieldSchema = new Schema({
+export const customFieldSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -12,13 +12,19 @@ const customFieldSchema = new Schema({
         required: true,
     },
     id: {
-      type: Number,
-      required: true,
-    },
-    lines: {
         type: Number,
         required: true,
     },
+    position: {
+        type: Number,
+        required: true,
+    },
+    public: {
+        type: Boolean,
+        required: true,
+    },
+    lines: Number,
+    options: [String],
 });
 
-export default model('CustomField', customFieldSchema);
+// export default model('CustomField', customFieldSchema);
